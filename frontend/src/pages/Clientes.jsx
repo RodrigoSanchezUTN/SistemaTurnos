@@ -169,7 +169,7 @@ function Clientes() {
           ) : (
             <tr>
               <td colSpan="5" className="text-center">
-                No se encontraron clientes.
+                No se encontraron clientess.
               </td>
             </tr>
           )}
