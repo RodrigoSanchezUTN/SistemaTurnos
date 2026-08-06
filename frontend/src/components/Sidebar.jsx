@@ -1,53 +1,40 @@
+import { Link } from "react-router-dom";
+
 function Sidebar() {
   return (
     <div
       className="bg-dark text-white p-3"
       style={{
-        width: "250px",
+        width: "240px",
         minHeight: "100vh",
       }}
     >
-      <h3 className="mb-4">📅 Turnify</h3>
+      <h4 className="mb-4">📅 Turnify</h4>
 
-      <ul className="nav flex-column">
+      <div className="d-grid gap-2">
 
-        <li className="nav-item mb-2">
-          <a href="#" className="nav-link text-white">
-            🏠 Dashboard
-          </a>
-        </li>
+        <Link className="btn btn-outline-light" to="/dashboard">
+          Dashboard
+        </Link>
 
-        <li className="nav-item mb-2">
-          <a href="#" className="nav-link text-white">
-            👥 Clientes
-          </a>
-        </li>
+        <Link className="btn btn-outline-light" to="/clientes">
+          Clientes
+        </Link>
 
-        <li className="nav-item mb-2">
-          <a href="#" className="nav-link text-white">
-            💼 Servicios
-          </a>
-        </li>
+        <Link className="btn btn-outline-light" to="/servicios">
+          Servicios
+        </Link>
 
-        <li className="nav-item mb-2">
-          <a href="#" className="nav-link text-white">
-            📅 Turnos
-          </a>
-        </li>
+        <Link className="btn btn-outline-light" to="/turnos">
+          Turnos
+        </Link>
 
-        <li className="nav-item mb-2">
-          <a href="#" className="nav-link text-white">
-            📊 Estadísticas
-          </a>
-        </li>
+        <Link className="btn btn-outline-light" to="/estadisticas">
+          Estadísticas
+        </Link>
 
-        <li className="nav-item mt-5">
-          <a href="#" className="nav-link text-danger">
-            🚪 Cerrar sesión
-          </a>
-        </li>
+      </div>
 
-      </ul>
     </div>
   );
 }

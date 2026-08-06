@@ -1,13 +1,15 @@
 function Navbar() {
   return (
-    <nav className="navbar navbar-dark bg-primary px-4">
-      <span className="navbar-brand mb-0 h1">
-        📅 Sistema de Turnos
+    <nav className="navbar navbar-dark bg-dark shadow px-4">
+
+      <span className="navbar-brand">
+        📅 Sistema de Gestión de Turnos
       </span>
 
       <span className="text-white">
-        Administrador
+        Bienvenido, Administrador
       </span>
+
     </nav>
   );
 }

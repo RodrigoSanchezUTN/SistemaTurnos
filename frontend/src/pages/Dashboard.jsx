@@ -1,65 +1,41 @@
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
+import DashboardLayout from "../layouts/DashboardLayout";
+import Card from "../components/Card";
 
 function Dashboard() {
   return (
-    <>
-      <Navbar />
+    <DashboardLayout>
 
-      <div className="d-flex">
+      <h2 className="mb-4">Dashboard</h2>
 
-        <Sidebar />
+      <div className="row">
 
-        <div className="container-fluid p-4">
+        <Card
+          titulo="Clientes"
+          valor="125"
+          color="primary"
+        />
 
-          <h2 className="mb-4">
-            Dashboard
-          </h2>
+        <Card
+          titulo="Turnos Hoy"
+          valor="18"
+          color="success"
+        />
 
-          <div className="row">
+        <Card
+          titulo="Ingresos"
+          valor="$185.000"
+          color="warning"
+        />
 
-            <div className="col-md-3 mb-3">
-              <div className="card shadow">
-                <div className="card-body text-center">
-                  <h5>Clientes</h5>
-                  <h2>125</h2>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-3 mb-3">
-              <div className="card shadow">
-                <div className="card-body text-center">
-                  <h5>Turnos Hoy</h5>
-                  <h2>18</h2>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-3 mb-3">
-              <div className="card shadow">
-                <div className="card-body text-center">
-                  <h5>Ingresos</h5>
-                  <h2>$185.000</h2>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-3 mb-3">
-              <div className="card shadow">
-                <div className="card-body text-center">
-                  <h5>Servicios</h5>
-                  <h2>54</h2>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
+        <Card
+          titulo="Servicios"
+          valor="54"
+          color="danger"
+        />
 
       </div>
-    </>
+
+    </DashboardLayout>
   );
 }
 
