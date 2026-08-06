@@ -29,6 +29,9 @@ function Turnos() {
   const [hora, setHora] = useState("");
   const [estado, setEstado] = useState("Pendiente");
 
+  const [modoEdicion, setModoEdicion] = useState(false);
+const [idEditar, setIdEditar] = useState(null);
+
   const agregarTurno = () => {
     if (!cliente || !servicio || !fecha || !hora) {
       alert("Complete todos los campos");

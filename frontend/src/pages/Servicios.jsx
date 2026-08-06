@@ -1,25 +1,24 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
+import AppContext from "../context/AppContext";
 
 function Servicios() {
-  const [servicios, setServicios] = useState([
-    {
-      id: 1,
-      nombre: "Masaje Relajante",
-      duracion: 60,
-      precio: 18000,
-    },
-    {
-      id: 2,
-      nombre: "Drenaje Linfático",
-      duracion: 45,
-      precio: 22000,
-    },
-  ]);
+  const { servicios, setServicios } = useContext(AppContext);
 
   const [nombre, setNombre] = useState("");
   const [duracion, setDuracion] = useState("");
   const [precio, setPrecio] = useState("");
+
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [idEditar, setIdEditar] = useState(null);
+
+  const limpiarFormulario = () => {
+    setNombre("");
+    setDuracion("");
+    setPrecio("");
+    setModoEdicion(false);
+    setIdEditar(null);
+  };
 
   const agregarServicio = () => {
     if (!nombre || !duracion || !precio) {
@@ -35,53 +34,87 @@ function Servicios() {
     };
 
     setServicios([...servicios, nuevoServicio]);
+    limpiarFormulario();
+  };
 
-    setNombre("");
-    setDuracion("");
-    setPrecio("");
+  const editarServicio = (servicio) => {
+    setNombre(servicio.nombre);
+    setDuracion(servicio.duracion);
+    setPrecio(servicio.precio);
+    setModoEdicion(true);
+    setIdEditar(servicio.id);
+  };
+
+  const actualizarServicio = () => {
+    if (!nombre || !duracion || !precio) {
+      alert("Complete todos los campos");
+      return;
+    }
+
+    const serviciosActualizados = servicios.map((servicio) =>
+      servicio.id === idEditar
+        ? {
+            ...servicio,
+            nombre,
+            duracion,
+            precio,
+          }
+        : servicio
+    );
+
+    setServicios(serviciosActualizados);
+    limpiarFormulario();
   };
 
   const eliminarServicio = (id) => {
     if (window.confirm("¿Eliminar este servicio?")) {
-      setServicios(servicios.filter((servicio) => servicio.id !== id));
+      setServicios(
+        servicios.filter((servicio) => servicio.id !== id)
+      );
     }
   };
 
   return (
     <DashboardLayout>
-
       <h2 className="mb-4">💆 Gestión de Servicios</h2>
 
       <div className="card shadow p-4 mb-4">
 
-        <h4>Nuevo Servicio</h4>
+        <h4 className="mb-3">
+          {modoEdicion ? "Editar Servicio" : "Nuevo Servicio"}
+        </h4>
 
-        <div className="row mt-3">
+        <div className="row g-3">
 
           <div className="col-md-4">
+            <label className="form-label">Nombre</label>
+
             <input
               className="form-control"
-              placeholder="Nombre"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
             />
           </div>
 
           <div className="col-md-4">
+            <label className="form-label">
+              Duración (minutos)
+            </label>
+
             <input
               type="number"
               className="form-control"
-              placeholder="Duración (min)"
               value={duracion}
               onChange={(e) => setDuracion(e.target.value)}
             />
           </div>
 
           <div className="col-md-4">
+            <label className="form-label">Precio</label>
+
             <input
               type="number"
               className="form-control"
-              placeholder="Precio"
               value={precio}
               onChange={(e) => setPrecio(e.target.value)}
             />
@@ -89,12 +122,34 @@ function Servicios() {
 
         </div>
 
-        <button
-          className="btn btn-success mt-3"
-          onClick={agregarServicio}
-        >
-          Agregar Servicio
-        </button>
+        <div className="mt-4">
+
+          {modoEdicion ? (
+            <>
+              <button
+                className="btn btn-warning me-2"
+                onClick={actualizarServicio}
+              >
+                Actualizar
+              </button>
+
+              <button
+                className="btn btn-secondary"
+                onClick={limpiarFormulario}
+              >
+                Cancelar
+              </button>
+            </>
+          ) : (
+            <button
+              className="btn btn-success"
+              onClick={agregarServicio}
+            >
+              Agregar Servicio
+            </button>
+          )}
+
+        </div>
 
       </div>
 
@@ -124,11 +179,16 @@ function Servicios() {
 
               <td>{servicio.duracion} min</td>
 
-              <td>${Number(servicio.precio).toLocaleString()}</td>
+              <td>
+                ${Number(servicio.precio).toLocaleString()}
+              </td>
 
               <td>
 
-                <button className="btn btn-warning btn-sm me-2">
+                <button
+                  className="btn btn-warning btn-sm me-2"
+                  onClick={() => editarServicio(servicio)}
+                >
                   Editar
                 </button>
 
