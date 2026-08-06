@@ -1,28 +1,20 @@
 const express = require("express");
-const prisma = require("../config/prisma");
+
+const {
+    obtenerClientes,
+    crearCliente,
+    actualizarCliente,
+    eliminarCliente
+} = require("../controllers/clientesController");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
-    const clientes = await prisma.cliente.findMany();
+router.get("/", obtenerClientes);
 
-    res.json(clientes);
-});
+router.post("/", crearCliente);
 
-router.post("/", async (req, res) => {
-    const { nombre, apellido, telefono, email, observaciones } = req.body;
+router.put("/:id", actualizarCliente);
 
-    const cliente = await prisma.cliente.create({
-        data: {
-            nombre,
-            apellido,
-            telefono,
-            email,
-            observaciones
-        }
-    });
-
-    res.json(cliente);
-});
+router.delete("/:id", eliminarCliente);
 
 module.exports = router;
