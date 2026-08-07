@@ -1,4 +1,6 @@
 import { useContext, useState } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import DashboardLayout from "../layouts/DashboardLayout";
 import AppContext from "../context/AppContext";
 
@@ -8,6 +10,7 @@ function Servicios() {
   const [nombre, setNombre] = useState("");
   const [duracion, setDuracion] = useState("");
   const [precio, setPrecio] = useState("");
+  const [busqueda, setBusqueda] = useState("");
 
   const [modoEdicion, setModoEdicion] = useState(false);
   const [idEditar, setIdEditar] = useState(null);
@@ -22,7 +25,7 @@ function Servicios() {
 
   const agregarServicio = () => {
     if (!nombre || !duracion || !precio) {
-      alert("Complete todos los campos");
+      toast.error("Complete todos los campos");
       return;
     }
 
@@ -34,6 +37,7 @@ function Servicios() {
     };
 
     setServicios([...servicios, nuevoServicio]);
+    toast.success("Servicio agregado correctamente");
     limpiarFormulario();
   };
 
@@ -47,7 +51,7 @@ function Servicios() {
 
   const actualizarServicio = () => {
     if (!nombre || !duracion || !precio) {
-      alert("Complete todos los campos");
+      toast.error("Complete todos los campos");
       return;
     }
 
@@ -63,17 +67,39 @@ function Servicios() {
     );
 
     setServicios(serviciosActualizados);
+    toast.info("Servicio actualizado correctamente");
     limpiarFormulario();
   };
 
-  const eliminarServicio = (id) => {
-    if (window.confirm("¿Eliminar este servicio?")) {
+ const eliminarServicio = (id) => {
+  Swal.fire({
+    title: "¿Eliminar servicio?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
       setServicios(
         servicios.filter((servicio) => servicio.id !== id)
       );
-    }
-  };
 
+      toast.success("Servicio eliminado correctamente");
+    }
+  });
+};
+const serviciosFiltrados = servicios.filter((servicio) => {
+  const texto = busqueda.toLowerCase();
+
+  return (
+    servicio.nombre.toLowerCase().includes(texto) ||
+    servicio.duracion.toString().includes(texto) ||
+    servicio.precio.toString().includes(texto)
+  );
+});
   return (
     <DashboardLayout>
       <h2 className="mb-4">💆 Gestión de Servicios</h2>
@@ -152,6 +178,15 @@ function Servicios() {
         </div>
 
       </div>
+      <div className="mb-4">
+  <input
+    type="text"
+    className="form-control"
+    placeholder="🔍 Buscar por nombre, duración o precio..."
+    value={busqueda}
+    onChange={(e) => setBusqueda(e.target.value)}
+  />
+</div>
 
       <table className="table table-striped table-hover shadow">
 
@@ -169,7 +204,7 @@ function Servicios() {
 
         <tbody>
 
-          {servicios.map((servicio) => (
+          {serviciosFiltrados.map((servicio) => (
 
             <tr key={servicio.id}>
 

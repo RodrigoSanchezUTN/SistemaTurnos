@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
+
 import DashboardLayout from "../layouts/DashboardLayout";
-import ClienteForm from "../components/ClienteForm";
-import ClienteSearch from "../components/ClienteSearch";
-import ClienteTable from "../components/ClienteTable";
 import AppContext from "../context/AppContext";
 
 function Clientes() {
@@ -11,6 +11,7 @@ function Clientes() {
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
   const [email, setEmail] = useState("");
+
   const [busqueda, setBusqueda] = useState("");
 
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -20,13 +21,24 @@ function Clientes() {
     setNombre("");
     setTelefono("");
     setEmail("");
+
     setModoEdicion(false);
     setIdEditar(null);
   };
 
   const agregarCliente = () => {
-    if (!nombre || !telefono || !email) {
-      alert("Complete todos los campos");
+    if (!nombre.trim() || !telefono.trim() || !email.trim()) {
+      toast.error("Complete todos los campos");
+      return;
+    }
+
+    const existe = clientes.some(
+      (c) =>
+        c.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (existe) {
+      toast.warning("Ese email ya está registrado");
       return;
     }
 
@@ -38,6 +50,9 @@ function Clientes() {
     };
 
     setClientes([...clientes, nuevoCliente]);
+
+    toast.success("Cliente agregado correctamente");
+
     limpiarFormulario();
   };
 
@@ -45,13 +60,14 @@ function Clientes() {
     setNombre(cliente.nombre);
     setTelefono(cliente.telefono);
     setEmail(cliente.email);
+
     setModoEdicion(true);
     setIdEditar(cliente.id);
   };
 
   const actualizarCliente = () => {
-    if (!nombre || !telefono || !email) {
-      alert("Complete todos los campos");
+    if (!nombre.trim() || !telefono.trim() || !email.trim()) {
+      toast.error("Complete todos los campos");
       return;
     }
 
@@ -67,46 +83,246 @@ function Clientes() {
     );
 
     setClientes(clientesActualizados);
+
+    toast.info("Cliente actualizado");
+
     limpiarFormulario();
   };
 
   const eliminarCliente = (id) => {
-    if (window.confirm("¿Eliminar este cliente?")) {
-      setClientes(clientes.filter((cliente) => cliente.id !== id));
+  Swal.fire({
+    title: "¿Eliminar cliente?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      setClientes(
+        clientes.filter((cliente) => cliente.id !== id)
+      );
+
+      toast.success("Cliente eliminado correctamente");
     }
-  };
+  });
+};
 
-  const clientesFiltrados = clientes.filter((cliente) =>
-    cliente.nombre.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const clientesFiltrados = clientes.filter((cliente) => {
+    const texto = busqueda.toLowerCase();
 
-  return (
-    <DashboardLayout>
-      <h2 className="mb-4">👥 Gestión de Clientes</h2>
+    return (
+      cliente.nombre.toLowerCase().includes(texto) ||
+      cliente.telefono.toLowerCase().includes(texto) ||
+      cliente.email.toLowerCase().includes(texto)
+    );
+  });
 
-      <ClienteForm
-        nombre={nombre}
-        setNombre={setNombre}
-        telefono={telefono}
-        setTelefono={setTelefono}
-        email={email}
-        setEmail={setEmail}
-        modoEdicion={modoEdicion}
-        agregarCliente={agregarCliente}
-        actualizarCliente={actualizarCliente}
-        limpiarFormulario={limpiarFormulario}
-      />
+ return (
+  <DashboardLayout>
+          <div className="container-fluid">
 
-      <ClienteSearch
-        busqueda={busqueda}
-        setBusqueda={setBusqueda}
-      />
+        <h2 className="mb-4">
+          👥 Gestión de Clientes
+        </h2>
 
-      <ClienteTable
-        clientes={clientesFiltrados}
-        editarCliente={editarCliente}
-        eliminarCliente={eliminarCliente}
-      />
+        <div className="card shadow border-0 mb-4">
+
+          <div className="card-header bg-primary text-white">
+            <h5 className="mb-0">
+              {modoEdicion ? "Editar Cliente" : "Nuevo Cliente"}
+            </h5>
+          </div>
+
+          <div className="card-body">
+
+            <div className="row">
+
+              <div className="col-md-4 mb-3">
+
+                <label className="form-label">
+                  Nombre
+                </label>
+
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Ingrese el nombre"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                />
+
+              </div>
+
+              <div className="col-md-4 mb-3">
+
+                <label className="form-label">
+                  Teléfono
+                </label>
+
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Ingrese el teléfono"
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                />
+
+              </div>
+
+              <div className="col-md-4 mb-3">
+
+                <label className="form-label">
+                  Email
+                </label>
+
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="Ingrese el email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+
+              </div>
+
+            </div>
+
+            {!modoEdicion ? (
+
+              <button
+                className="btn btn-success"
+                onClick={agregarCliente}
+              >
+                Agregar Cliente
+              </button>
+
+            ) : (
+
+              <>
+                <button
+                  className="btn btn-primary me-2"
+                  onClick={actualizarCliente}
+                >
+                  Actualizar Cliente
+                </button>
+
+                <button
+                  className="btn btn-secondary"
+                  onClick={limpiarFormulario}
+                >
+                  Cancelar
+                </button>
+              </>
+
+            )}
+
+          </div>
+
+        </div>
+                <div className="card shadow border-0">
+
+          <div className="card-body">
+
+            <div className="row mb-3">
+
+              <div className="col-md-6">
+
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="🔍 Buscar por nombre, teléfono o email..."
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                />
+
+              </div>
+
+            </div>
+
+            <div className="table-responsive">
+
+              <table className="table table-hover align-middle">
+
+                <thead className="table-dark">
+
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th width="180">Acciones</th>
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  {clientesFiltrados.length > 0 ? (
+
+                    clientesFiltrados.map((cliente) => (
+
+                      <tr key={cliente.id}>
+
+                        <td>{cliente.id}</td>
+
+                        <td>{cliente.nombre}</td>
+
+                        <td>{cliente.telefono}</td>
+
+                        <td>{cliente.email}</td>
+
+                        <td>
+
+                          <button
+                            className="btn btn-warning btn-sm me-2"
+                            onClick={() => editarCliente(cliente)}
+                          >
+                            Editar
+                          </button>
+
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => eliminarCliente(cliente.id)}
+                          >
+                            Eliminar
+                          </button>
+
+                        </td>
+
+                      </tr>
+
+                    ))
+
+                  ) : (
+
+                    <tr>
+
+                      <td
+                        colSpan="5"
+                        className="text-center py-4"
+                      >
+                        No se encontraron clientes.
+                      </td>
+
+                    </tr>
+
+                  )}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </DashboardLayout>
   );
 }
