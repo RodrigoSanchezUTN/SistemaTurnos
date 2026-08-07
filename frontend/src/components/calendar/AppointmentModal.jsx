@@ -1,12 +1,50 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
+import { useTurnos } from "../../context/TurnosContext";
 
-function NewAppointmentModal({ show, onClose }) {
+function AppointmentModal({
+  show,
+  onClose,
+  modo = "crear",
+}) {
 
   const [cliente, setCliente] = useState("");
   const [servicio, setServicio] = useState("");
   const [fecha, setFecha] = useState("");
   const [hora, setHora] = useState("");
   const [observaciones, setObservaciones] = useState("");
+
+  const { agregarTurno } = useTurnos();
+
+  
+
+  const guardarTurno = () => {
+
+  if (!cliente || !servicio || !fecha || !hora) {
+    toast.error("Completa todos los campos.");
+    return;
+  }
+
+  agregarTurno({
+    cliente,
+    servicio,
+    fecha,
+    hora,
+    estado: "Pendiente",
+    observaciones,
+  });
+
+  toast.success("Turno creado correctamente.");
+
+  setCliente("");
+  setServicio("");
+  setFecha("");
+  setHora("");
+  setObservaciones("");
+
+  onClose();
+
+};
 
   if (!show) return null;
 
@@ -17,7 +55,9 @@ function NewAppointmentModal({ show, onClose }) {
 
         <div className="modal-header">
 
-          <h3>Nuevo turno</h3>
+          <h3>
+  {modo === "crear" ? "Nuevo turno" : "Editar turno"}
+</h3>
 
           <button
             className="btn-close"
@@ -119,9 +159,12 @@ function NewAppointmentModal({ show, onClose }) {
             Cancelar
           </button>
 
-          <button className="btn btn-primary">
-            Guardar turno
-          </button>
+          <button
+  className="btn btn-primary"
+  onClick={guardarTurno}
+>
+  {modo === "crear" ? "Guardar turno" : "Guardar cambios"}
+</button>
 
         </div>
 
@@ -131,4 +174,4 @@ function NewAppointmentModal({ show, onClose }) {
   );
 }
 
-export default NewAppointmentModal;
+export default AppointmentModal;

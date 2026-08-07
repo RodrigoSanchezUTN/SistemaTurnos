@@ -4,6 +4,7 @@ function CalendarGrid({
   mesActual,
   añoActual,
   turnos,
+  onTurnoClick,
 }) {
   const primerDia = new Date(añoActual, mesActual, 1);
 
@@ -57,12 +58,13 @@ function CalendarGrid({
 
       {celdas.map((dia, index) => (
         <CalendarDay
-          key={index}
-          dia={dia}
-          mes={mesActual}
-          año={añoActual}
-          turnos={turnos}
-        />
+  key={index}
+  dia={dia}
+  mes={mesActual}
+  año={añoActual}
+  turnos={turnos}
+  onTurnoClick={onTurnoClick}
+/>
       ))}
 
     </div>

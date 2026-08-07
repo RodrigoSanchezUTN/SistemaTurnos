@@ -1,9 +1,8 @@
-import { useState } from "react";
-import NewAppointmentModal from "./NewAppointmentModal";
 
-function QuickActions() {
 
-  const [showModal, setShowModal] = useState(false);
+function QuickActions({ onNuevoTurno }) {
+
+  
 
   return (
     <>
@@ -16,7 +15,7 @@ function QuickActions() {
 
         <button
           className="btn btn-primary w-100 mb-2"
-          onClick={() => setShowModal(true)}
+          onClick={onNuevoTurno}
         >
           + Nuevo turno
         </button>
@@ -31,10 +30,7 @@ function QuickActions() {
 
       </div>
 
-      <NewAppointmentModal
-        show={showModal}
-        onClose={() => setShowModal(false)}
-      />
+     
 
     </>
   );

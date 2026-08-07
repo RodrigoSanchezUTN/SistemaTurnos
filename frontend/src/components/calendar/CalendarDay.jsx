@@ -1,11 +1,15 @@
 import Swal from "sweetalert2";
 
+
+
 function CalendarDay({
   dia,
   mes,
   año,
   turnos,
+  onTurnoClick,
 }) {
+  
   if (!dia) {
     return <div className="calendar-empty"></div>;
   }
@@ -74,7 +78,15 @@ function CalendarDay({
             style={{
               background: colorEstado(turno.estado),
             }}
-            onClick={() => abrirTurno(turno)}
+            onClick={() => {
+
+  if (onTurnoClick) {
+    onTurnoClick(turno);
+  } else {
+    abrirTurno(turno);
+  }
+
+}}
           >
             {turno.hora} - {turno.cliente}
           </div>

@@ -8,25 +8,28 @@ import "./index.css";
 
 import App from "./App.jsx";
 import AppProvider from "./context/AppProvider";
+import { TurnosProvider } from "./context/TurnosContext";
 
 import { ToastContainer } from "react-toastify";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AppProvider>
-      <App />
+      <TurnosProvider>
+        <App />
 
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnFocusLoss
-        pauseOnHover
-        draggable
-        theme="colored"
-      />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnFocusLoss
+          pauseOnHover
+          draggable
+          theme="colored"
+        />
+      </TurnosProvider>
     </AppProvider>
   </StrictMode>
 );
