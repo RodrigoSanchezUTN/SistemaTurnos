@@ -3,6 +3,7 @@ import {
   FaUsers,
   FaSpa,
   FaCalendarAlt,
+  FaRegCalendarAlt,
   FaChartBar,
   FaCog,
   FaSignOutAlt,
@@ -34,6 +35,11 @@ function Sidebar() {
       nombre: "Turnos",
       ruta: "/turnos",
       icono: <FaCalendarAlt />,
+    },
+    {
+      nombre: "Calendario",
+      ruta: "/calendario",
+      icono: <FaRegCalendarAlt />,
     },
     {
       nombre: "Estadísticas",
