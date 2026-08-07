@@ -6,13 +6,13 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:30px;
+    margin-bottom:15px;
     flex-wrap:wrap;
     gap:20px;
 }
 
 .calendar-title{
-    font-size:2rem;
+    font-size:1.8rem;
     font-weight:700;
     color:#1f2937;
 }
@@ -36,10 +36,10 @@
 }
 
 .calendar-btn{
-    width:45px;
-    height:45px;
+    width:40px;
+    height:40px;
     border:none;
-    border-radius:12px;
+    border-radius:10px;
     background:#2563eb;
     color:white;
     transition:.2s;
@@ -57,7 +57,7 @@
 .calendar-grid{
     display:grid;
     grid-template-columns:repeat(7,1fr);
-    gap:15px;
+    gap:8px;
 }
 
 .calendar-weekday{
@@ -65,10 +65,11 @@
     color:white;
     font-weight:700;
     text-align:center;
-    padding:14px;
-    border-radius:14px;
-    letter-spacing:.5px;
-    box-shadow:0 6px 15px rgba(37,99,235,.15);
+    padding:9px;
+border-radius:10px;
+letter-spacing:.3px;
+box-shadow:none;
+font-size:.95rem;
     user-select:none;
 }
 
@@ -76,112 +77,107 @@
 /* DAY */
 /* ========================= */
 
+/* ========================= */
+/* DAY */
+/* ========================= */
+
 .calendar-day{
-
-    background:white;
-
-    border-radius:18px;
-
-    min-height:170px;
-
-    padding:15px;
-
-    border:1px solid #e5e7eb;
-
-    transition:all .25s ease;
-
-    cursor:pointer;
-
-    display:flex;
-
-    flex-direction:column;
-
+    background: #ffffff;
+    border: 2px solid #edf2f7;
+    border-radius: 10px;
+    min-height: 105px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    transition: all .25s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }
+
 .calendar-day:hover{
-
-    transform:translateY(-6px);
-
-    box-shadow:0 20px 35px rgba(0,0,0,.12);
-
-    border-color:#2563eb;
-
+    transform: translateY(-5px);
+    border-color: #3b82f6;
+    box-shadow: 0 15px 35px rgba(37,99,235,.15);
 }
 
 .calendar-empty{
-
-    background:#f9fafb;
-
-    border-radius:18px;
-
-    min-height:170px;
-
+    background: #f8fafc;
+    border: 1px dashed #e5e7eb;
+    border-radius: 18px;
+    min-height: 105px;
 }
 
 /* ========================= */
 
 .calendar-number{
+    width: 34px;
+    height: 34px;
 
-    width:34px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-    height:34px;
+    border-radius: 50%;
 
-    border-radius:50%;
+    font-size: 18px;
+    font-weight: 800;
 
-    display:flex;
+    color: #1e293b;
 
-    justify-content:center;
+    margin-bottom: 14px;
 
-    align-items:center;
-
-    background:#eff6ff;
-
-    color:#2563eb;
-
-    font-weight:700;
-
-    margin-bottom:12px;
-
-    font-size:15px;
-
+    transition: .2s;
 }
 
+.calendar-day:hover .calendar-number{
+    background:#2563eb;
+    color:white;
+}
 /* ========================= */
 
 .calendar-events{
-
     display:flex;
-
     flex-direction:column;
-
     gap:8px;
-
+    margin-top:auto;
 }
 
 /* ========================= */
 
 .calendar-event{
 
-    color:white;
+    background:#f8fafc !important;
 
-    font-size:.8rem;
+    color:#1f2937;
 
-    padding:6px 10px;
+    border-left:4px solid #2563eb;
 
     border-radius:10px;
 
-    overflow:hidden;
+    padding:5px 8px;
 
-    text-overflow:ellipsis;
+    font-size:.70rem;
+
+    font-weight:600;
+
+    overflow:hidden;
 
     white-space:nowrap;
 
+    text-overflow:ellipsis;
+
     transition:.2s;
+
+    cursor:pointer;
 
 }
 
 .calendar-event:hover{
 
-    filter:brightness(.92);
+    transform:translateX(4px);
+
+    background:#eff6ff !important;
 
 }
 
@@ -232,8 +228,246 @@ min-height:120px;
 
     background:#f8fafc;
 
-    padding:20px;
+    padding:12px;
+
+    border-radius:16px;
+
+}
+/* ========================= */
+/* LAYOUT */
+/* ========================= */
+
+.calendar-layout{
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    align-items: start;
+}
+
+.calendar-main{
+    width:100%;
+}
+
+.calendar-sidebar{
+    position:sticky;
+    top:20px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+.calendar-side-card{
+    width:100%;
+    max-width:300px;
+}
+/* ========================= */
+/* SIDEBAR */
+/* ========================= */
+
+.calendar-sidebar{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.calendar-side-card{
+
+    background:#fff;
 
     border-radius:20px;
+
+    padding:20px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.06);
+
+    border:1px solid #edf2f7;
+
+}
+
+.calendar-side-title{
+
+    font-size:1.1rem;
+
+    font-weight:700;
+
+    margin-bottom:18px;
+
+    color:#1e293b;
+
+}
+
+.summary-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:12px;
+
+    font-size:.95rem;
+
+}
+
+.summary-row strong{
+
+    color:#2563eb;
+
+}
+
+.calendar-side-card button{
+
+    border-radius:12px;
+
+    font-weight:600;
+
+    padding:10px;
+
+}
+/* ========================= */
+/* MODAL */
+/* ========================= */
+
+.modal-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(15,23,42,.45);
+
+    backdrop-filter:blur(6px);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:9999;
+
+    animation:fadeIn .25s ease;
+
+}
+
+.appointment-modal{
+
+    width:100%;
+
+    max-width:550px;
+
+    background:#fff;
+
+    border-radius:22px;
+
+    padding:25px;
+
+    box-shadow:0 25px 60px rgba(0,0,0,.18);
+
+    animation:modalIn .25s ease;
+
+}
+
+.modal-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:25px;
+
+}
+
+.modal-header h3{
+
+    margin:0;
+
+    font-size:1.4rem;
+
+    font-weight:700;
+
+}
+
+.btn-close{
+
+    border:none;
+
+    background:#f1f5f9;
+
+    width:38px;
+
+    height:38px;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.btn-close:hover{
+
+    background:#e2e8f0;
+
+    transform:rotate(90deg);
+
+}
+
+.modal-body label{
+
+    font-weight:600;
+
+    margin-bottom:6px;
+
+}
+
+.modal-footer{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    margin-top:20px;
+
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+@keyframes modalIn{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(-25px) scale(.95);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0) scale(1);
+
+    }
 
 }

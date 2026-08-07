@@ -1,83 +1,72 @@
 import { useContext, useState } from "react";
 import "../styles/calendario.css";
 import DashboardLayout from "../layouts/DashboardLayout";
-
-import CalendarHeader from "../components/CalendarHeader";
-import CalendarGrid from "../components/CalendarGrid";
+import MonthlySummary from "../components/calendar/MonthlySummary";
+import UpcomingAppointments from "../components/calendar/UpcomingAppointments";
+import QuickActions from "../components/calendar/QuickActions";
+import CalendarHeader from "../components/calendar/CalendarHeader";
+import CalendarGrid from "../components/calendar/CalendarGrid";
 
 import AppContext from "../context/AppContext";
 
 function Calendario() {
   const { turnos } = useContext(AppContext);
 
-  const hoy = new Date();
+  const [fechaActual, setFechaActual] = useState(new Date());
 
-  const [mesActual, setMesActual] = useState(hoy.getMonth());
-  const [añoActual, setAñoActual] = useState(hoy.getFullYear());
+  const mesActual = fechaActual.getMonth();
+const añoActual = fechaActual.getFullYear();
+
+console.log(fechaActual);
+console.log("Mes:", mesActual);
 
   const cambiarMes = (direccion) => {
-    let nuevoMes = mesActual + direccion;
-    let nuevoAño = añoActual;
 
-    if (nuevoMes > 11) {
-      nuevoMes = 0;
-      nuevoAño++;
-    }
+  setFechaActual((fecha) => {
 
-    if (nuevoMes < 0) {
-      nuevoMes = 11;
-      nuevoAño--;
-    }
+    return new Date(
+      fecha.getFullYear(),
+      fecha.getMonth() + direccion,
+      1
+    );
 
-    setMesActual(nuevoMes);
-    setAñoActual(nuevoAño);
-  };
+  });
+
+};
 
   return (
     <DashboardLayout>
       <div className="container-fluid">
 
         <CalendarHeader
-          mesActual={mesActual}
-          añoActual={añoActual}
-          cambiarMes={cambiarMes}
-        />
+  key={`${mesActual}-${añoActual}`}
+  mesActual={mesActual}
+  añoActual={añoActual}
+  cambiarMes={cambiarMes}
+/>
 
-        <div className="row">
+        <div className="calendar-layout">
 
-          <div className="col-lg-9">
+  <div className="calendar-main">
 
-            <CalendarGrid
-              mesActual={mesActual}
-              añoActual={añoActual}
-              turnos={turnos}
-            />
+    <CalendarGrid
+      mesActual={mesActual}
+      añoActual={añoActual}
+      turnos={turnos}
+    />
 
-          </div>
+  </div>
 
-          <div className="col-lg-3">
+  <div className="calendar-sidebar">
 
-            <div className="card shadow rounded-4 border-0 p-4">
+    <UpcomingAppointments turnos={turnos} />
+    <MonthlySummary turnos={turnos} />
 
-              <h4 className="fw-bold mb-3">
-                Próximamente
-              </h4>
+  <QuickActions />
 
-              <p className="text-muted mb-0">
-                Aquí aparecerán:
-              </p>
+  </div>
 
-              <ul className="mt-3">
-                <li>📅 Turnos de hoy</li>
-                <li>⏰ Próximos turnos</li>
-                <li>📊 Resumen mensual</li>
-              </ul>
-
-            </div>
-
-          </div>
-
-        </div>
+</div>
 
       </div>
     </DashboardLayout>

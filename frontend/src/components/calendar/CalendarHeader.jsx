@@ -5,6 +5,7 @@ function CalendarHeader({
   añoActual,
   cambiarMes,
 }) {
+
   const meses = [
     "Enero",
     "Febrero",
@@ -24,13 +25,15 @@ function CalendarHeader({
     <div className="calendar-header">
 
       <div>
+
         <h2 className="calendar-title">
-          📅 Agenda de Turnos
+          Calendario
         </h2>
 
         <p className="calendar-subtitle">
-          Organiza todos los turnos del mes.
+          Organizá todos los turnos del mes.
         </p>
+
       </div>
 
       <div className="calendar-navigation">
@@ -43,10 +46,10 @@ function CalendarHeader({
         </button>
 
         <div className="calendar-month">
-
-          {meses[mesActual]} {añoActual}
-
-        </div>
+  {meses[mesActual]} de {añoActual}
+</div>
+          
+        
 
         <button
           className="calendar-btn"
