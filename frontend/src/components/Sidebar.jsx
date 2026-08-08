@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function Sidebar() {
   const location = useLocation();
@@ -53,7 +54,21 @@ function Sidebar() {
     },
   ];
 
-  const cerrarSesion = () => {
+  const cerrarSesion = async () => {
+    const resultado = await Swal.fire({
+      title: "¿Cerrar sesión?",
+      text: "¿Estás seguro de que querés cerrar tu sesión?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, cerrar sesión",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+    });
+
+    if (!resultado.isConfirmed) {
+      return;
+    }
+
     navigate("/");
   };
 
