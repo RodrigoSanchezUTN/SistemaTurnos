@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
+import {
+  FaBriefcase,
+} from "react-icons/fa";
 
 function NegocioCard() {
   const [negocio, setNegocio] = useState(() => {
@@ -57,8 +60,9 @@ function NegocioCard() {
   return (
     <div className="card shadow border-0 rounded-4 p-4 mb-4">
 
-      <h4 className="fw-bold mb-4">
-        💼 Negocio
+      <h4 className="fw-bold mb-4 d-flex align-items-center">
+        <FaBriefcase className="me-2" />
+        Negocio
       </h4>
 
       <div className="mb-3">

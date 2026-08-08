@@ -1,4 +1,12 @@
 import { useContext } from "react";
+
+import {
+  FaChartBar,
+  FaMoneyBillWave,
+  FaCalendarAlt,
+  FaSpa,
+} from "react-icons/fa";
+
 import DashboardLayout from "../layouts/DashboardLayout";
 import AppContext from "../context/AppContext";
 
@@ -24,7 +32,8 @@ ChartJS.register(
 );
 
 function Estadisticas() {
-  const { clientes, servicios, turnos } = useContext(AppContext);
+  const { clientes, servicios, turnos } =
+    useContext(AppContext);
 
   const confirmados = turnos.filter(
     (t) => t.estado === "Confirmado"
@@ -44,10 +53,11 @@ function Estadisticas() {
 
   const ingresosTotales = turnos.reduce(
     (total, turno) => {
-      const servicioEncontrado = servicios.find(
-        (servicio) =>
-          servicio.nombre === turno.servicio
-      );
+      const servicioEncontrado =
+        servicios.find(
+          (servicio) =>
+            servicio.nombre === turno.servicio
+        );
 
       return (
         total +
@@ -97,13 +107,15 @@ function Estadisticas() {
     cantidadPorServicio
   ).sort((a, b) => b[1] - a[1]);
 
-  const serviciosLabels = serviciosOrdenados.map(
-    ([nombre]) => nombre
-  );
+  const serviciosLabels =
+    serviciosOrdenados.map(
+      ([nombre]) => nombre
+    );
 
-  const serviciosData = serviciosOrdenados.map(
-    ([, cantidad]) => cantidad
-  );
+  const serviciosData =
+    serviciosOrdenados.map(
+      ([, cantidad]) => cantidad
+    );
 
   const serviciosChart = {
     labels: serviciosLabels,
@@ -180,13 +192,14 @@ function Estadisticas() {
   return (
     <DashboardLayout>
 
-      <h2 className="mb-4">
-        📊 Estadísticas
+      {/* TÍTULO */}
+
+      <h2 className="mb-4 d-flex align-items-center">
+        <FaChartBar className="me-2" />
+        Estadísticas
       </h2>
 
-      {/* ============================ */}
       {/* RESUMEN */}
-      {/* ============================ */}
 
       <div className="row g-4 mb-4">
 
@@ -194,8 +207,12 @@ function Estadisticas() {
 
           <div className="card shadow border-0 rounded-4 p-4">
 
-            <h5 className="text-muted">
-              💰 Ingresos totales
+            <h5 className="text-muted d-flex align-items-center">
+
+              <FaMoneyBillWave className="me-2" />
+
+              Ingresos totales
+
             </h5>
 
             <h2 className="fw-bold mt-3">
@@ -210,8 +227,12 @@ function Estadisticas() {
 
           <div className="card shadow border-0 rounded-4 p-4">
 
-            <h5 className="text-muted">
-              📅 Turnos del mes
+            <h5 className="text-muted d-flex align-items-center">
+
+              <FaCalendarAlt className="me-2" />
+
+              Turnos del mes
+
             </h5>
 
             <h2 className="fw-bold mt-3">
@@ -224,9 +245,7 @@ function Estadisticas() {
 
       </div>
 
-      {/* ============================ */}
       {/* GRÁFICOS PRINCIPALES */}
-      {/* ============================ */}
 
       <div className="row g-4">
 
@@ -260,9 +279,7 @@ function Estadisticas() {
 
       </div>
 
-      {/* ============================ */}
       {/* SERVICIOS MÁS SOLICITADOS */}
-      {/* ============================ */}
 
       <div className="row mt-4">
 
@@ -270,8 +287,12 @@ function Estadisticas() {
 
           <div className="card shadow border-0 rounded-4 p-4">
 
-            <h5 className="mb-4">
-              💆 Servicios más solicitados
+            <h5 className="mb-4 d-flex align-items-center">
+
+              <FaSpa className="me-2" />
+
+              Servicios más solicitados
+
             </h5>
 
             {serviciosOrdenados.length === 0 ? (

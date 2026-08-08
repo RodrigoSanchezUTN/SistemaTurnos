@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { FaUser } from "react-icons/fa";
 
 function PerfilCard() {
   const [perfil, setPerfil] = useState(() => {
@@ -58,8 +59,9 @@ function PerfilCard() {
   return (
     <div className="card shadow border-0 rounded-4 p-4 h-100">
 
-      <h4 className="fw-bold mb-4">
-        👤 Perfil
+      <h4 className="fw-bold mb-4 d-flex align-items-center">
+        <FaUser className="me-2" />
+        Perfil
       </h4>
 
       <div className="mb-3">

@@ -2,6 +2,16 @@ import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
+import {
+  FaUsers,
+  FaSearch,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+} from "react-icons/fa";
+
 import DashboardLayout from "../layouts/DashboardLayout";
 import AppContext from "../context/AppContext";
 
@@ -154,8 +164,11 @@ function Clientes() {
 
       <div className="container-fluid">
 
-        <h2 className="mb-4">
-          👥 Gestión de Clientes
+        {/* TÍTULO */}
+
+        <h2 className="mb-4 d-flex align-items-center">
+          <FaUsers className="me-2" />
+          Gestión de Clientes
         </h2>
 
         {/* FORMULARIO */}
@@ -163,11 +176,13 @@ function Clientes() {
         <div className="card shadow border-0 mb-4">
 
           <div className="card-header bg-primary text-white">
+
             <h5 className="mb-0">
               {modoEdicion
                 ? "Editar Cliente"
                 : "Nuevo Cliente"}
             </h5>
+
           </div>
 
           <div className="card-body">
@@ -236,6 +251,7 @@ function Clientes() {
                 className="btn btn-success"
                 onClick={agregarCliente}
               >
+                <FaPlus className="me-2" />
                 Agregar Cliente
               </button>
 
@@ -246,6 +262,7 @@ function Clientes() {
                   className="btn btn-primary me-2"
                   onClick={actualizarCliente}
                 >
+                  <FaSave className="me-2" />
                   Actualizar Cliente
                 </button>
 
@@ -253,6 +270,7 @@ function Clientes() {
                   className="btn btn-secondary"
                   onClick={limpiarFormulario}
                 >
+                  <FaTimes className="me-2" />
                   Cancelar
                 </button>
               </>
@@ -271,12 +289,26 @@ function Clientes() {
 
             <div className="row mb-3">
 
-              <div className="col-md-6">
+              <div className="col-md-6 position-relative">
+
+                <FaSearch
+                  style={{
+                    position: "absolute",
+                    left: "25px",
+                    top: "50%",
+                    transform:
+                      "translateY(-50%)",
+                    color: "#6c757d",
+                  }}
+                />
 
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="🔍 Buscar por nombre, teléfono o email..."
+                  style={{
+                    paddingLeft: "40px",
+                  }}
+                  placeholder="Buscar por nombre, teléfono o email..."
                   value={busqueda}
                   onChange={(e) =>
                     setBusqueda(e.target.value)
@@ -333,9 +365,12 @@ function Clientes() {
                             <button
                               className="btn btn-warning btn-sm me-2"
                               onClick={() =>
-                                editarCliente(cliente)
+                                editarCliente(
+                                  cliente
+                                )
                               }
                             >
+                              <FaEdit className="me-1" />
                               Editar
                             </button>
 
@@ -347,6 +382,7 @@ function Clientes() {
                                 )
                               }
                             >
+                              <FaTrash className="me-1" />
                               Eliminar
                             </button>
 

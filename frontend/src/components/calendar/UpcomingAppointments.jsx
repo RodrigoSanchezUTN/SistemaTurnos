@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { FaCalendarAlt } from "react-icons/fa";
 
 function UpcomingAppointments({ turnos }) {
   const proximosTurnos = useMemo(() => {
@@ -6,6 +7,7 @@ function UpcomingAppointments({ turnos }) {
       .sort((a, b) => {
         const fechaA = new Date(`${a.fecha} ${a.hora}`);
         const fechaB = new Date(`${b.fecha} ${b.hora}`);
+
         return fechaA - fechaB;
       })
       .slice(0, 5);
@@ -13,8 +15,10 @@ function UpcomingAppointments({ turnos }) {
 
   return (
     <div className="calendar-side-card">
+
       <h4 className="calendar-side-title">
-        📅 Próximos turnos
+        <FaCalendarAlt className="me-2" />
+        Próximos turnos
       </h4>
 
       {proximosTurnos.length === 0 ? (
@@ -38,6 +42,7 @@ function UpcomingAppointments({ turnos }) {
           </div>
         ))
       )}
+
     </div>
   );
 }

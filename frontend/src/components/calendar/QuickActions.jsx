@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { FaBolt, FaPlus } from "react-icons/fa";
+
 import AppointmentModal from "./AppointmentModal";
 
 function QuickActions() {
@@ -9,14 +11,17 @@ function QuickActions() {
       <div className="calendar-side-card">
 
         <h4 className="calendar-side-title">
-          ⚡ Acciones rápidas
+          <FaBolt className="me-2" />
+          Acciones rápidas
         </h4>
 
         <button
+          type="button"
           className="btn btn-primary w-100"
           onClick={() => setShowModal(true)}
         >
-          + Nuevo turno
+          <FaPlus className="me-2" />
+          Nuevo turno
         </button>
 
       </div>

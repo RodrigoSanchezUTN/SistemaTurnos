@@ -1,5 +1,6 @@
-function MonthlySummary({ turnos }) {
+import { FaChartBar } from "react-icons/fa";
 
+function MonthlySummary({ turnos }) {
   const hoy = new Date().toISOString().split("T")[0];
 
   const turnosHoy = turnos.filter(
@@ -19,11 +20,11 @@ function MonthlySummary({ turnos }) {
   ).length;
 
   return (
-
     <div className="calendar-side-card">
 
       <h4 className="calendar-side-title">
-        📊 Resumen
+        <FaChartBar className="me-2" />
+        Resumen
       </h4>
 
       <div className="summary-row">
@@ -47,9 +48,7 @@ function MonthlySummary({ turnos }) {
       </div>
 
     </div>
-
   );
-
 }
 
 export default MonthlySummary;

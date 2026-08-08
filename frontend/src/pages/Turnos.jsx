@@ -1,7 +1,18 @@
 import { useContext, useState } from "react";
 import { toast } from "react-toastify";
-import DashboardLayout from "../layouts/DashboardLayout";
 import Swal from "sweetalert2";
+
+import {
+  FaCalendarAlt,
+  FaSearch,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+} from "react-icons/fa";
+
+import DashboardLayout from "../layouts/DashboardLayout";
 import AppContext from "../context/AppContext";
 
 function Turnos() {
@@ -91,38 +102,45 @@ function Turnos() {
   };
 
   const eliminarTurno = (id) => {
-  Swal.fire({
-    title: "¿Eliminar turno?",
-    text: "Esta acción no se puede deshacer.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      setTurnos(turnos.filter((t) => t.id !== id));
+    Swal.fire({
+      title: "¿Eliminar turno?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTurnos(turnos.filter((t) => t.id !== id));
 
-      toast.success("Turno eliminado correctamente");
-    }
+        toast.success("Turno eliminado correctamente");
+      }
+    });
+  };
+
+  const turnosFiltrados = turnos.filter((turno) => {
+    const texto = busqueda.toLowerCase();
+
+    return (
+      turno.cliente.toLowerCase().includes(texto) ||
+      turno.servicio.toLowerCase().includes(texto) ||
+      turno.fecha.includes(texto) ||
+      turno.hora.includes(texto) ||
+      turno.estado.toLowerCase().includes(texto)
+    );
   });
-};
-const turnosFiltrados = turnos.filter((turno) => {
-  const texto = busqueda.toLowerCase();
 
-  return (
-    turno.cliente.toLowerCase().includes(texto) ||
-    turno.servicio.toLowerCase().includes(texto) ||
-    turno.fecha.includes(texto) ||
-    turno.hora.includes(texto) ||
-    turno.estado.toLowerCase().includes(texto)
-  );
-});
   return (
     <DashboardLayout>
 
-      <h2 className="mb-4">📅 Gestión de Turnos</h2>
+      <h2 className="mb-4 d-flex align-items-center">
+        <FaCalendarAlt className="me-2" />
+        Gestión de Turnos
+      </h2>
+
+      {/* FORMULARIO */}
 
       <div className="card shadow p-4 mb-4">
 
@@ -143,7 +161,9 @@ const turnosFiltrados = turnos.filter((turno) => {
               value={cliente}
               onChange={(e) => setCliente(e.target.value)}
             >
-              <option value="">Seleccione un cliente</option>
+              <option value="">
+                Seleccione un cliente
+              </option>
 
               {clientes.map((c) => (
                 <option
@@ -153,6 +173,7 @@ const turnosFiltrados = turnos.filter((turno) => {
                   {c.nombre}
                 </option>
               ))}
+
             </select>
 
           </div>
@@ -180,6 +201,7 @@ const turnosFiltrados = turnos.filter((turno) => {
                   {s.nombre}
                 </option>
               ))}
+
             </select>
 
           </div>
@@ -240,6 +262,7 @@ const turnosFiltrados = turnos.filter((turno) => {
                   className="btn btn-warning me-2"
                   onClick={agregarTurno}
                 >
+                  <FaSave className="me-2" />
                   Actualizar
                 </button>
 
@@ -247,6 +270,7 @@ const turnosFiltrados = turnos.filter((turno) => {
                   className="btn btn-secondary"
                   onClick={limpiarFormulario}
                 >
+                  <FaTimes className="me-2" />
                   Cancelar
                 </button>
               </>
@@ -255,6 +279,7 @@ const turnosFiltrados = turnos.filter((turno) => {
                 className="btn btn-success"
                 onClick={agregarTurno}
               >
+                <FaPlus className="me-2" />
                 Agregar Turno
               </button>
             )}
@@ -264,15 +289,35 @@ const turnosFiltrados = turnos.filter((turno) => {
         </div>
 
       </div>
-      <div className="mb-4">
-  <input
-    type="text"
-    className="form-control"
-    placeholder="🔍 Buscar por cliente, servicio, fecha, hora o estado..."
-    value={busqueda}
-    onChange={(e) => setBusqueda(e.target.value)}
-  />
-</div>
+
+      {/* BÚSQUEDA */}
+
+      <div className="mb-4 position-relative">
+
+        <FaSearch
+          style={{
+            position: "absolute",
+            left: "14px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: "#6c757d",
+          }}
+        />
+
+        <input
+          type="text"
+          className="form-control"
+          style={{
+            paddingLeft: "40px",
+          }}
+          placeholder="Buscar por cliente, servicio, fecha, hora o estado..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
+
+      </div>
+
+      {/* TABLA */}
 
       <table className="table table-striped table-hover shadow">
 
@@ -294,9 +339,14 @@ const turnosFiltrados = turnos.filter((turno) => {
           {turnosFiltrados.length === 0 ? (
 
             <tr>
-              <td colSpan="6" className="text-center">
+
+              <td
+                colSpan="6"
+                className="text-center"
+              >
                 No hay turnos registrados.
               </td>
+
             </tr>
 
           ) : (
@@ -305,13 +355,21 @@ const turnosFiltrados = turnos.filter((turno) => {
 
               <tr key={turno.id}>
 
-                <td>{turno.cliente}</td>
+                <td>
+                  {turno.cliente}
+                </td>
 
-                <td>{turno.servicio}</td>
+                <td>
+                  {turno.servicio}
+                </td>
 
-                <td>{turno.fecha}</td>
+                <td>
+                  {turno.fecha}
+                </td>
 
-                <td>{turno.hora}</td>
+                <td>
+                  {turno.hora}
+                </td>
 
                 <td>
 
@@ -335,13 +393,17 @@ const turnosFiltrados = turnos.filter((turno) => {
                     className="btn btn-warning btn-sm me-2"
                     onClick={() => editarTurno(turno)}
                   >
+                    <FaEdit className="me-1" />
                     Editar
                   </button>
 
                   <button
                     className="btn btn-danger btn-sm"
-                    onClick={() => eliminarTurno(turno.id)}
+                    onClick={() =>
+                      eliminarTurno(turno.id)
+                    }
                   >
+                    <FaTrash className="me-1" />
                     Eliminar
                   </button>
 

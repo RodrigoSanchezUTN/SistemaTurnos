@@ -2,6 +2,16 @@ import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
+import {
+  FaSpa,
+  FaSearch,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+} from "react-icons/fa";
+
 import DashboardLayout from "../layouts/DashboardLayout";
 import AppContext from "../context/AppContext";
 
@@ -144,8 +154,11 @@ function Servicios() {
   return (
     <DashboardLayout>
 
-      <h2 className="mb-4">
-        💆 Gestión de Servicios
+      {/* TÍTULO */}
+
+      <h2 className="mb-4 d-flex align-items-center">
+        <FaSpa className="me-2" />
+        Gestión de Servicios
       </h2>
 
       {/* FORMULARIO */}
@@ -216,34 +229,53 @@ function Servicios() {
 
         <div className="mt-4">
 
-          {modoEdicion ? (
+          {/* AGREGAR */}
 
-            <>
-              <button
-                className="btn btn-warning me-2"
-                onClick={actualizarServicio}
-              >
-                Actualizar
-              </button>
+          <button
+            type="button"
+            className="btn btn-success"
+            onClick={agregarServicio}
+            style={{
+              display: modoEdicion
+                ? "none"
+                : "inline-block",
+            }}
+          >
+            <FaPlus className="me-2" />
+            Agregar Servicio
+          </button>
 
-              <button
-                className="btn btn-secondary"
-                onClick={limpiarFormulario}
-              >
-                Cancelar
-              </button>
-            </>
+          {/* ACTUALIZAR */}
 
-          ) : (
+          <button
+            type="button"
+            className="btn btn-warning me-2"
+            onClick={actualizarServicio}
+            style={{
+              display: modoEdicion
+                ? "inline-block"
+                : "none",
+            }}
+          >
+            <FaSave className="me-2" />
+            Actualizar
+          </button>
 
-            <button
-              className="btn btn-success"
-              onClick={agregarServicio}
-            >
-              Agregar Servicio
-            </button>
+          {/* CANCELAR */}
 
-          )}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={limpiarFormulario}
+            style={{
+              display: modoEdicion
+                ? "inline-block"
+                : "none",
+            }}
+          >
+            <FaTimes className="me-2" />
+            Cancelar
+          </button>
 
         </div>
 
@@ -251,12 +283,26 @@ function Servicios() {
 
       {/* BÚSQUEDA */}
 
-      <div className="mb-4">
+      <div className="mb-4 position-relative">
+
+        <FaSearch
+          style={{
+            position: "absolute",
+            left: "14px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: "#6c757d",
+            zIndex: 1,
+          }}
+        />
 
         <input
           type="text"
           className="form-control"
-          placeholder="🔍 Buscar por nombre, duración o precio..."
+          style={{
+            paddingLeft: "40px",
+          }}
+          placeholder="Buscar por nombre, duración o precio..."
           value={busqueda}
           onChange={(e) =>
             setBusqueda(e.target.value)
@@ -314,17 +360,18 @@ function Servicios() {
                     <td>
 
                       <button
+                        type="button"
                         className="btn btn-warning btn-sm me-2"
                         onClick={() =>
-                          editarServicio(
-                            servicio
-                          )
+                          editarServicio(servicio)
                         }
                       >
+                        <FaEdit className="me-1" />
                         Editar
                       </button>
 
                       <button
+                        type="button"
                         className="btn btn-danger btn-sm"
                         onClick={() =>
                           eliminarServicio(
@@ -332,6 +379,7 @@ function Servicios() {
                           )
                         }
                       >
+                        <FaTrash className="me-1" />
                         Eliminar
                       </button>
 
@@ -340,7 +388,6 @@ function Servicios() {
                   </tr>
 
                 )
-
               )
 
             ) : (

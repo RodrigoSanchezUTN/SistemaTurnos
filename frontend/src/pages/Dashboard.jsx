@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
+
 import {
   FaUsers,
   FaSpa,
@@ -7,6 +8,8 @@ import {
   FaMoneyBillWave,
   FaClock,
   FaPlus,
+  FaHandPaper,
+  FaBolt,
 } from "react-icons/fa";
 
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -95,15 +98,22 @@ function Dashboard() {
   return (
     <DashboardLayout>
 
+      {/* ENCABEZADO */}
+
       <div className="dashboard-header">
 
-        <h1>👋 Bienvenido</h1>
+        <h1>
+          <FaHandPaper className="me-2" />
+          Bienvenido
+        </h1>
 
         <p>
           Panel principal del sistema de gestión
         </p>
 
       </div>
+
+      {/* TARJETAS */}
 
       <div className="dashboard-grid">
 
@@ -125,9 +135,13 @@ function Dashboard() {
 
             <div>
 
-              <h6>{card.titulo}</h6>
+              <h6>
+                {card.titulo}
+              </h6>
 
-              <h2>{card.valor}</h2>
+              <h2>
+                {card.valor}
+              </h2>
 
             </div>
 
@@ -137,9 +151,14 @@ function Dashboard() {
 
       </div>
 
+      {/* ACCIONES RÁPIDAS */}
+
       <div className="recent-card">
 
-        <h3>⚡ Acciones rápidas</h3>
+        <h3>
+          <FaBolt className="me-2" />
+          Acciones rápidas
+        </h3>
 
         <div className="d-flex flex-wrap gap-3">
 
@@ -171,13 +190,20 @@ function Dashboard() {
 
       </div>
 
+      {/* PRÓXIMOS TURNOS */}
+
       <div className="recent-card">
 
-        <h3>⏳ Próximos turnos</h3>
+        <h3>
+          <FaClock className="me-2" />
+          Próximos turnos
+        </h3>
 
         {proximosTurnos.length === 0 ? (
 
-          <p>No hay próximos turnos.</p>
+          <p>
+            No hay próximos turnos.
+          </p>
 
         ) : (
 
@@ -186,12 +212,10 @@ function Dashboard() {
             <thead>
 
               <tr>
-
                 <th>Cliente</th>
                 <th>Servicio</th>
                 <th>Fecha</th>
                 <th>Hora</th>
-
               </tr>
 
             </thead>
@@ -202,10 +226,21 @@ function Dashboard() {
 
                 <tr key={turno.id}>
 
-                  <td>{turno.cliente}</td>
-                  <td>{turno.servicio}</td>
-                  <td>{turno.fecha}</td>
-                  <td>{turno.hora}</td>
+                  <td>
+                    {turno.cliente}
+                  </td>
+
+                  <td>
+                    {turno.servicio}
+                  </td>
+
+                  <td>
+                    {turno.fecha}
+                  </td>
+
+                  <td>
+                    {turno.hora}
+                  </td>
 
                 </tr>
 
@@ -219,13 +254,20 @@ function Dashboard() {
 
       </div>
 
+      {/* ÚLTIMOS TURNOS */}
+
       <div className="recent-card">
 
-        <h3>📅 Últimos turnos</h3>
+        <h3>
+          <FaCalendarAlt className="me-2" />
+          Últimos turnos
+        </h3>
 
         {turnos.length === 0 ? (
 
-          <p>No hay turnos registrados.</p>
+          <p>
+            No hay turnos registrados.
+          </p>
 
         ) : (
 
@@ -234,12 +276,10 @@ function Dashboard() {
             <thead>
 
               <tr>
-
                 <th>Cliente</th>
                 <th>Servicio</th>
                 <th>Fecha</th>
                 <th>Hora</th>
-
               </tr>
 
             </thead>
@@ -253,10 +293,21 @@ function Dashboard() {
 
                   <tr key={turno.id}>
 
-                    <td>{turno.cliente}</td>
-                    <td>{turno.servicio}</td>
-                    <td>{turno.fecha}</td>
-                    <td>{turno.hora}</td>
+                    <td>
+                      {turno.cliente}
+                    </td>
+
+                    <td>
+                      {turno.servicio}
+                    </td>
+
+                    <td>
+                      {turno.fecha}
+                    </td>
+
+                    <td>
+                      {turno.hora}
+                    </td>
 
                   </tr>
 

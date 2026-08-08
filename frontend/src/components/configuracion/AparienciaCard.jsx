@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { FaPalette } from "react-icons/fa";
 
 function AparienciaCard() {
   const [tema, setTema] = useState(
@@ -26,11 +27,14 @@ function AparienciaCard() {
 
   return (
     <div className="card shadow border-0 rounded-4 p-4 h-100">
-      <h4 className="fw-bold mb-4">
-        🎨 Apariencia
+
+      <h4 className="fw-bold mb-4 d-flex align-items-center">
+        <FaPalette className="me-2" />
+        Apariencia
       </h4>
 
       <div className="mb-3">
+
         <label className="form-label">
           Tema
         </label>
@@ -38,7 +42,9 @@ function AparienciaCard() {
         <select
           className="form-select"
           value={tema}
-          onChange={(e) => setTema(e.target.value)}
+          onChange={(e) =>
+            setTema(e.target.value)
+          }
         >
           <option value="claro">
             Claro
@@ -48,6 +54,7 @@ function AparienciaCard() {
             Oscuro
           </option>
         </select>
+
       </div>
 
       <button
@@ -56,6 +63,7 @@ function AparienciaCard() {
       >
         Guardar preferencias
       </button>
+
     </div>
   );
 }
