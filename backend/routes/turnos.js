@@ -3,15 +3,20 @@ const express = require("express");
 const {
     obtenerTurnos,
     crearTurno,
+    actualizarTurno,
     eliminarTurno
 } = require("../controllers/turnosController");
 
+const verificarToken = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.get("/", obtenerTurnos);
+router.get("/", verificarToken, obtenerTurnos);
 
-router.post("/", crearTurno);
+router.post("/", verificarToken, crearTurno);
 
-router.delete("/:id", eliminarTurno);
+router.put("/:id", verificarToken, actualizarTurno);
+
+router.delete("/:id", verificarToken, eliminarTurno);
 
 module.exports = router;

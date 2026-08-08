@@ -7,14 +7,16 @@ const {
     eliminarServicio
 } = require("../controllers/serviciosController");
 
+const verificarToken = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.get("/", obtenerServicios);
+router.get("/", verificarToken, obtenerServicios);
 
-router.post("/", crearServicio);
+router.post("/", verificarToken, crearServicio);
 
-router.put("/:id", actualizarServicio);
+router.put("/:id", verificarToken, actualizarServicio);
 
-router.delete("/:id", eliminarServicio);
+router.delete("/:id", verificarToken, eliminarServicio);
 
 module.exports = router;

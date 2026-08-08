@@ -5,10 +5,12 @@ const {
     crearUsuario
 } = require("../controllers/usuariosController");
 
+const verificarToken = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.get("/", obtenerUsuarios);
+router.get("/", verificarToken, obtenerUsuarios);
 
-router.post("/", crearUsuario);
+router.post("/", verificarToken, crearUsuario);
 
 module.exports = router;

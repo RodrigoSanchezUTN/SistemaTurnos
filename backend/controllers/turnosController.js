@@ -20,6 +20,17 @@ const crearTurno = async (req, res) => {
     res.json(turno);
 };
 
+const actualizarTurno = async (req, res) => {
+    const id = Number(req.params.id);
+
+    const turno = await prisma.turno.update({
+        where: { id },
+        data: req.body
+    });
+
+    res.json(turno);
+};
+
 const eliminarTurno = async (req, res) => {
     const id = Number(req.params.id);
 
@@ -35,5 +46,6 @@ const eliminarTurno = async (req, res) => {
 module.exports = {
     obtenerTurnos,
     crearTurno,
+    actualizarTurno,
     eliminarTurno
 };

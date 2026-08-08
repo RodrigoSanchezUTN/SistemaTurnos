@@ -7,14 +7,16 @@ const {
     eliminarCliente
 } = require("../controllers/clientesController");
 
+const verificarToken = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.get("/", obtenerClientes);
+router.get("/", verificarToken, obtenerClientes);
 
-router.post("/", crearCliente);
+router.post("/", verificarToken, crearCliente);
 
-router.put("/:id", actualizarCliente);
+router.put("/:id", verificarToken, actualizarCliente);
 
-router.delete("/:id", eliminarCliente);
+router.delete("/:id", verificarToken, eliminarCliente);
 
 module.exports = router;
