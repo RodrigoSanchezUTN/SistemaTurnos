@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+
 import DashboardLayout from "../layouts/DashboardLayout";
 import AppContext from "../context/AppContext";
 
@@ -24,8 +25,18 @@ function Servicios() {
   };
 
   const agregarServicio = () => {
-    if (!nombre || !duracion || !precio) {
+    if (!nombre.trim() || !duracion || !precio) {
       toast.error("Complete todos los campos");
+      return;
+    }
+
+    if (Number(duracion) <= 0) {
+      toast.error("La duración debe ser mayor a 0");
+      return;
+    }
+
+    if (Number(precio) <= 0) {
+      toast.error("El precio debe ser mayor a 0");
       return;
     }
 
@@ -37,7 +48,9 @@ function Servicios() {
     };
 
     setServicios([...servicios, nuevoServicio]);
+
     toast.success("Servicio agregado correctamente");
+
     limpiarFormulario();
   };
 
@@ -45,105 +58,158 @@ function Servicios() {
     setNombre(servicio.nombre);
     setDuracion(servicio.duracion);
     setPrecio(servicio.precio);
+
     setModoEdicion(true);
     setIdEditar(servicio.id);
   };
 
   const actualizarServicio = () => {
-    if (!nombre || !duracion || !precio) {
+    if (!nombre.trim() || !duracion || !precio) {
       toast.error("Complete todos los campos");
       return;
     }
 
-    const serviciosActualizados = servicios.map((servicio) =>
-      servicio.id === idEditar
-        ? {
-            ...servicio,
-            nombre,
-            duracion,
-            precio,
-          }
-        : servicio
+    if (Number(duracion) <= 0) {
+      toast.error("La duración debe ser mayor a 0");
+      return;
+    }
+
+    if (Number(precio) <= 0) {
+      toast.error("El precio debe ser mayor a 0");
+      return;
+    }
+
+    const serviciosActualizados = servicios.map(
+      (servicio) =>
+        servicio.id === idEditar
+          ? {
+              ...servicio,
+              nombre,
+              duracion,
+              precio,
+            }
+          : servicio
     );
 
     setServicios(serviciosActualizados);
+
     toast.info("Servicio actualizado correctamente");
+
     limpiarFormulario();
   };
 
- const eliminarServicio = (id) => {
-  Swal.fire({
-    title: "¿Eliminar servicio?",
-    text: "Esta acción no se puede deshacer.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      setServicios(
-        servicios.filter((servicio) => servicio.id !== id)
+  const eliminarServicio = (id) => {
+    Swal.fire({
+      title: "¿Eliminar servicio?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setServicios(
+          servicios.filter(
+            (servicio) => servicio.id !== id
+          )
+        );
+
+        toast.success(
+          "Servicio eliminado correctamente"
+        );
+      }
+    });
+  };
+
+  const serviciosFiltrados = servicios.filter(
+    (servicio) => {
+      const texto = busqueda.toLowerCase();
+
+      return (
+        servicio.nombre
+          .toLowerCase()
+          .includes(texto) ||
+        servicio.duracion
+          .toString()
+          .includes(texto) ||
+        servicio.precio
+          .toString()
+          .includes(texto)
       );
-
-      toast.success("Servicio eliminado correctamente");
     }
-  });
-};
-const serviciosFiltrados = servicios.filter((servicio) => {
-  const texto = busqueda.toLowerCase();
-
-  return (
-    servicio.nombre.toLowerCase().includes(texto) ||
-    servicio.duracion.toString().includes(texto) ||
-    servicio.precio.toString().includes(texto)
   );
-});
+
   return (
     <DashboardLayout>
-      <h2 className="mb-4">💆 Gestión de Servicios</h2>
+
+      <h2 className="mb-4">
+        💆 Gestión de Servicios
+      </h2>
+
+      {/* FORMULARIO */}
 
       <div className="card shadow p-4 mb-4">
 
         <h4 className="mb-3">
-          {modoEdicion ? "Editar Servicio" : "Nuevo Servicio"}
+          {modoEdicion
+            ? "Editar Servicio"
+            : "Nuevo Servicio"}
         </h4>
 
         <div className="row g-3">
 
           <div className="col-md-4">
-            <label className="form-label">Nombre</label>
+
+            <label className="form-label">
+              Nombre
+            </label>
 
             <input
               className="form-control"
               value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
+              onChange={(e) =>
+                setNombre(e.target.value)
+              }
             />
+
           </div>
 
           <div className="col-md-4">
+
             <label className="form-label">
               Duración (minutos)
             </label>
 
             <input
               type="number"
+              min="1"
               className="form-control"
               value={duracion}
-              onChange={(e) => setDuracion(e.target.value)}
+              onChange={(e) =>
+                setDuracion(e.target.value)
+              }
             />
+
           </div>
 
           <div className="col-md-4">
-            <label className="form-label">Precio</label>
+
+            <label className="form-label">
+              Precio
+            </label>
 
             <input
               type="number"
+              min="1"
               className="form-control"
               value={precio}
-              onChange={(e) => setPrecio(e.target.value)}
+              onChange={(e) =>
+                setPrecio(e.target.value)
+              }
             />
+
           </div>
 
         </div>
@@ -151,6 +217,7 @@ const serviciosFiltrados = servicios.filter((servicio) => {
         <div className="mt-4">
 
           {modoEdicion ? (
+
             <>
               <button
                 className="btn btn-warning me-2"
@@ -166,83 +233,136 @@ const serviciosFiltrados = servicios.filter((servicio) => {
                 Cancelar
               </button>
             </>
+
           ) : (
+
             <button
               className="btn btn-success"
               onClick={agregarServicio}
             >
               Agregar Servicio
             </button>
+
           )}
 
         </div>
 
       </div>
+
+      {/* BÚSQUEDA */}
+
       <div className="mb-4">
-  <input
-    type="text"
-    className="form-control"
-    placeholder="🔍 Buscar por nombre, duración o precio..."
-    value={busqueda}
-    onChange={(e) => setBusqueda(e.target.value)}
-  />
-</div>
 
-      <table className="table table-striped table-hover shadow">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="🔍 Buscar por nombre, duración o precio..."
+          value={busqueda}
+          onChange={(e) =>
+            setBusqueda(e.target.value)
+          }
+        />
 
-        <thead className="table-dark">
+      </div>
 
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Duración</th>
-            <th>Precio</th>
-            <th>Acciones</th>
-          </tr>
+      {/* TABLA */}
 
-        </thead>
+      <div className="table-responsive">
 
-        <tbody>
+        <table className="table table-striped table-hover shadow">
 
-          {serviciosFiltrados.map((servicio) => (
+          <thead className="table-dark">
 
-            <tr key={servicio.id}>
-
-              <td>{servicio.id}</td>
-
-              <td>{servicio.nombre}</td>
-
-              <td>{servicio.duracion} min</td>
-
-              <td>
-                ${Number(servicio.precio).toLocaleString()}
-              </td>
-
-              <td>
-
-                <button
-                  className="btn btn-warning btn-sm me-2"
-                  onClick={() => editarServicio(servicio)}
-                >
-                  Editar
-                </button>
-
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => eliminarServicio(servicio.id)}
-                >
-                  Eliminar
-                </button>
-
-              </td>
-
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Duración</th>
+              <th>Precio</th>
+              <th>Acciones</th>
             </tr>
 
-          ))}
+          </thead>
 
-        </tbody>
+          <tbody>
 
-      </table>
+            {serviciosFiltrados.length > 0 ? (
+
+              serviciosFiltrados.map(
+                (servicio) => (
+
+                  <tr key={servicio.id}>
+
+                    <td>
+                      {servicio.id}
+                    </td>
+
+                    <td>
+                      {servicio.nombre}
+                    </td>
+
+                    <td>
+                      {servicio.duracion} min
+                    </td>
+
+                    <td>
+                      $
+                      {Number(
+                        servicio.precio
+                      ).toLocaleString()}
+                    </td>
+
+                    <td>
+
+                      <button
+                        className="btn btn-warning btn-sm me-2"
+                        onClick={() =>
+                          editarServicio(
+                            servicio
+                          )
+                        }
+                      >
+                        Editar
+                      </button>
+
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() =>
+                          eliminarServicio(
+                            servicio.id
+                          )
+                        }
+                      >
+                        Eliminar
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                )
+
+              )
+
+            ) : (
+
+              <tr>
+
+                <td
+                  colSpan="5"
+                  className="text-center py-4"
+                >
+                  No se encontraron servicios.
+                </td>
+
+              </tr>
+
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
 
     </DashboardLayout>
   );

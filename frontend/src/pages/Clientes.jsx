@@ -32,6 +32,14 @@ function Clientes() {
       return;
     }
 
+    const emailValido =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!emailValido) {
+      toast.error("Ingresá un email válido");
+      return;
+    }
+
     const existe = clientes.some(
       (c) =>
         c.email.toLowerCase() === email.toLowerCase()
@@ -71,15 +79,24 @@ function Clientes() {
       return;
     }
 
-    const clientesActualizados = clientes.map((cliente) =>
-      cliente.id === idEditar
-        ? {
-            ...cliente,
-            nombre,
-            telefono,
-            email,
-          }
-        : cliente
+    const emailValido =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!emailValido) {
+      toast.error("Ingresá un email válido");
+      return;
+    }
+
+    const clientesActualizados = clientes.map(
+      (cliente) =>
+        cliente.id === idEditar
+          ? {
+              ...cliente,
+              nombre,
+              telefono,
+              email,
+            }
+          : cliente
     );
 
     setClientes(clientesActualizados);
@@ -90,49 +107,66 @@ function Clientes() {
   };
 
   const eliminarCliente = (id) => {
-  Swal.fire({
-    title: "¿Eliminar cliente?",
-    text: "Esta acción no se puede deshacer.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      setClientes(
-        clientes.filter((cliente) => cliente.id !== id)
+    Swal.fire({
+      title: "¿Eliminar cliente?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setClientes(
+          clientes.filter(
+            (cliente) => cliente.id !== id
+          )
+        );
+
+        toast.success(
+          "Cliente eliminado correctamente"
+        );
+      }
+    });
+  };
+
+  const clientesFiltrados = clientes.filter(
+    (cliente) => {
+      const texto = busqueda.toLowerCase();
+
+      return (
+        cliente.nombre
+          .toLowerCase()
+          .includes(texto) ||
+        cliente.telefono
+          .toLowerCase()
+          .includes(texto) ||
+        cliente.email
+          .toLowerCase()
+          .includes(texto)
       );
-
-      toast.success("Cliente eliminado correctamente");
     }
-  });
-};
+  );
 
-  const clientesFiltrados = clientes.filter((cliente) => {
-    const texto = busqueda.toLowerCase();
+  return (
+    <DashboardLayout>
 
-    return (
-      cliente.nombre.toLowerCase().includes(texto) ||
-      cliente.telefono.toLowerCase().includes(texto) ||
-      cliente.email.toLowerCase().includes(texto)
-    );
-  });
-
- return (
-  <DashboardLayout>
-          <div className="container-fluid">
+      <div className="container-fluid">
 
         <h2 className="mb-4">
           👥 Gestión de Clientes
         </h2>
 
+        {/* FORMULARIO */}
+
         <div className="card shadow border-0 mb-4">
 
           <div className="card-header bg-primary text-white">
             <h5 className="mb-0">
-              {modoEdicion ? "Editar Cliente" : "Nuevo Cliente"}
+              {modoEdicion
+                ? "Editar Cliente"
+                : "Nuevo Cliente"}
             </h5>
           </div>
 
@@ -151,7 +185,9 @@ function Clientes() {
                   className="form-control"
                   placeholder="Ingrese el nombre"
                   value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
+                  onChange={(e) =>
+                    setNombre(e.target.value)
+                  }
                 />
 
               </div>
@@ -167,7 +203,9 @@ function Clientes() {
                   className="form-control"
                   placeholder="Ingrese el teléfono"
                   value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
+                  onChange={(e) =>
+                    setTelefono(e.target.value)
+                  }
                 />
 
               </div>
@@ -183,7 +221,9 @@ function Clientes() {
                   className="form-control"
                   placeholder="Ingrese el email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
                 />
 
               </div>
@@ -222,7 +262,10 @@ function Clientes() {
           </div>
 
         </div>
-                <div className="card shadow border-0">
+
+        {/* BÚSQUEDA Y TABLA */}
+
+        <div className="card shadow border-0">
 
           <div className="card-body">
 
@@ -235,7 +278,9 @@ function Clientes() {
                   className="form-control"
                   placeholder="🔍 Buscar por nombre, teléfono o email..."
                   value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
+                  onChange={(e) =>
+                    setBusqueda(e.target.value)
+                  }
                 />
 
               </div>
@@ -262,39 +307,55 @@ function Clientes() {
 
                   {clientesFiltrados.length > 0 ? (
 
-                    clientesFiltrados.map((cliente) => (
+                    clientesFiltrados.map(
+                      (cliente) => (
 
-                      <tr key={cliente.id}>
+                        <tr key={cliente.id}>
 
-                        <td>{cliente.id}</td>
+                          <td>
+                            {cliente.id}
+                          </td>
 
-                        <td>{cliente.nombre}</td>
+                          <td>
+                            {cliente.nombre}
+                          </td>
 
-                        <td>{cliente.telefono}</td>
+                          <td>
+                            {cliente.telefono}
+                          </td>
 
-                        <td>{cliente.email}</td>
+                          <td>
+                            {cliente.email}
+                          </td>
 
-                        <td>
+                          <td>
 
-                          <button
-                            className="btn btn-warning btn-sm me-2"
-                            onClick={() => editarCliente(cliente)}
-                          >
-                            Editar
-                          </button>
+                            <button
+                              className="btn btn-warning btn-sm me-2"
+                              onClick={() =>
+                                editarCliente(cliente)
+                              }
+                            >
+                              Editar
+                            </button>
 
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => eliminarCliente(cliente.id)}
-                          >
-                            Eliminar
-                          </button>
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() =>
+                                eliminarCliente(
+                                  cliente.id
+                                )
+                              }
+                            >
+                              Eliminar
+                            </button>
 
-                        </td>
+                          </td>
 
-                      </tr>
+                        </tr>
 
-                    ))
+                      )
+                    )
 
                   ) : (
 
