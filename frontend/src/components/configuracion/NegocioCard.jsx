@@ -2,19 +2,19 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 
 function NegocioCard() {
- const [negocio, setNegocio] = useState(() => {
-  const datos = localStorage.getItem("negocio");
+  const [negocio, setNegocio] = useState(() => {
+    const datos = localStorage.getItem("negocio");
 
-  return datos
-    ? JSON.parse(datos)
-    : {
-        nombre: "",
-        direccion: "",
-        whatsapp: "",
-        instagram: "",
-        horario: "",
-      };
-});
+    return datos
+      ? JSON.parse(datos)
+      : {
+          nombre: "",
+          direccion: "",
+          whatsapp: "",
+          instagram: "",
+          horario: "",
+        };
+  });
 
   const handleChange = (e) => {
     setNegocio({
@@ -24,8 +24,34 @@ function NegocioCard() {
   };
 
   const guardarNegocio = () => {
-    localStorage.setItem("negocio", JSON.stringify(negocio));
-    toast.success("Datos del negocio actualizados");
+    if (!negocio.nombre.trim()) {
+      toast.error("Ingresá el nombre del negocio.");
+      return;
+    }
+
+    if (!negocio.direccion.trim()) {
+      toast.error("Ingresá la dirección.");
+      return;
+    }
+
+    if (!negocio.whatsapp.trim()) {
+      toast.error("Ingresá el número de WhatsApp.");
+      return;
+    }
+
+    if (!negocio.horario.trim()) {
+      toast.error("Ingresá el horario de atención.");
+      return;
+    }
+
+    localStorage.setItem(
+      "negocio",
+      JSON.stringify(negocio)
+    );
+
+    toast.success(
+      "Datos del negocio actualizados"
+    );
   };
 
   return (
@@ -36,7 +62,10 @@ function NegocioCard() {
       </h4>
 
       <div className="mb-3">
-        <label className="form-label">Nombre del negocio</label>
+
+        <label className="form-label">
+          Nombre del negocio
+        </label>
 
         <input
           type="text"
@@ -45,10 +74,14 @@ function NegocioCard() {
           value={negocio.nombre}
           onChange={handleChange}
         />
+
       </div>
 
       <div className="mb-3">
-        <label className="form-label">Dirección</label>
+
+        <label className="form-label">
+          Dirección
+        </label>
 
         <input
           type="text"
@@ -57,10 +90,14 @@ function NegocioCard() {
           value={negocio.direccion}
           onChange={handleChange}
         />
+
       </div>
 
       <div className="mb-3">
-        <label className="form-label">WhatsApp</label>
+
+        <label className="form-label">
+          WhatsApp
+        </label>
 
         <input
           type="text"
@@ -69,10 +106,14 @@ function NegocioCard() {
           value={negocio.whatsapp}
           onChange={handleChange}
         />
+
       </div>
 
       <div className="mb-3">
-        <label className="form-label">Instagram</label>
+
+        <label className="form-label">
+          Instagram
+        </label>
 
         <input
           type="text"
@@ -81,10 +122,14 @@ function NegocioCard() {
           value={negocio.instagram}
           onChange={handleChange}
         />
+
       </div>
 
       <div className="mb-4">
-        <label className="form-label">Horario de atención</label>
+
+        <label className="form-label">
+          Horario de atención
+        </label>
 
         <input
           type="text"
@@ -94,6 +139,7 @@ function NegocioCard() {
           onChange={handleChange}
           placeholder="Ej: Lunes a Viernes de 9:00 a 18:00"
         />
+
       </div>
 
       <button
