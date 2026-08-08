@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 function AparienciaCard() {
@@ -6,20 +6,31 @@ function AparienciaCard() {
     localStorage.getItem("tema") || "claro"
   );
 
+  useEffect(() => {
+    document.body.classList.toggle(
+      "dark-mode",
+      tema === "oscuro"
+    );
+  }, [tema]);
+
   const guardarTema = () => {
     localStorage.setItem("tema", tema);
+
+    document.body.classList.toggle(
+      "dark-mode",
+      tema === "oscuro"
+    );
+
     toast.success("Preferencias guardadas");
   };
 
   return (
     <div className="card shadow border-0 rounded-4 p-4 h-100">
-
       <h4 className="fw-bold mb-4">
         🎨 Apariencia
       </h4>
 
       <div className="mb-3">
-
         <label className="form-label">
           Tema
         </label>
@@ -29,12 +40,14 @@ function AparienciaCard() {
           value={tema}
           onChange={(e) => setTema(e.target.value)}
         >
-          <option value="claro">Claro</option>
-          <option value="oscuro" disabled>
-            Oscuro (Próximamente)
+          <option value="claro">
+            Claro
+          </option>
+
+          <option value="oscuro">
+            Oscuro
           </option>
         </select>
-
       </div>
 
       <button
@@ -43,7 +56,6 @@ function AparienciaCard() {
       >
         Guardar preferencias
       </button>
-
     </div>
   );
 }
