@@ -13,36 +13,47 @@ import AppointmentModal from "../components/calendar/AppointmentModal";
 import { useTurnos } from "../context/TurnosContext";
 
 function Calendario() {
-
   const { turnos } = useTurnos();
 
   const [fechaActual, setFechaActual] = useState(new Date());
+
   const [showModal, setShowModal] = useState(false);
+  const [modoModal, setModoModal] = useState("crear");
+  const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
 
   const mesActual = fechaActual.getMonth();
   const añoActual = fechaActual.getFullYear();
 
   const cambiarMes = (direccion) => {
-
     setFechaActual((fecha) => {
-
       return new Date(
         fecha.getFullYear(),
         fecha.getMonth() + direccion,
         1
       );
-
     });
-
   };
 
   const abrirNuevoTurno = () => {
+    setModoModal("crear");
+    setTurnoSeleccionado(null);
     setShowModal(true);
+  };
+
+  const abrirEditarTurno = (turno) => {
+    setModoModal("editar");
+    setTurnoSeleccionado(turno);
+    setShowModal(true);
+  };
+
+  const cerrarModal = () => {
+    setShowModal(false);
+    setTurnoSeleccionado(null);
+    setModoModal("crear");
   };
 
   return (
     <DashboardLayout>
-
       <div className="container-fluid">
 
         <CalendarHeader
@@ -60,6 +71,7 @@ function Calendario() {
               mesActual={mesActual}
               añoActual={añoActual}
               turnos={turnos}
+              onTurnoClick={abrirEditarTurno}
             />
 
           </div>
@@ -79,15 +91,16 @@ function Calendario() {
         </div>
 
         <AppointmentModal
-          show={showModal}
-          onClose={() => setShowModal(false)}
-        />
+  key={showModal ? "modal-abierto" : "modal-cerrado"}
+  show={showModal}
+  modo={modoModal}
+  turno={turnoSeleccionado}
+  onClose={cerrarModal}
+/>
 
       </div>
-
     </DashboardLayout>
   );
-
 }
 
 export default Calendario;
