@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import "../styles/calendario.css";
 
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -10,10 +10,10 @@ import CalendarHeader from "../components/calendar/CalendarHeader";
 import CalendarGrid from "../components/calendar/CalendarGrid";
 import AppointmentModal from "../components/calendar/AppointmentModal";
 
-import { useTurnos } from "../context/TurnosContext";
+import AppContext from "../context/AppContext";
 
 function Calendario() {
-  const { turnos } = useTurnos();
+  const { turnos } = useContext(AppContext);
 
   const [fechaActual, setFechaActual] = useState(new Date());
 

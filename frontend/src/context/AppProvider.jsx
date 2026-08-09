@@ -1,8 +1,65 @@
 import { useEffect, useState } from "react";
 import AppContext from "./AppContext";
 
-function AppProvider({ children }) {
+const horariosPorDefecto = {
+  lunes: {
+    activo: true,
+    inicio: "09:00",
+    fin: "13:00",
+    inicio2: "15:00",
+    fin2: "20:00",
+  },
 
+  martes: {
+    activo: true,
+    inicio: "09:00",
+    fin: "13:00",
+    inicio2: "15:00",
+    fin2: "20:00",
+  },
+
+  miercoles: {
+    activo: true,
+    inicio: "09:00",
+    fin: "13:00",
+    inicio2: "15:00",
+    fin2: "20:00",
+  },
+
+  jueves: {
+    activo: true,
+    inicio: "09:00",
+    fin: "13:00",
+    inicio2: "15:00",
+    fin2: "20:00",
+  },
+
+  viernes: {
+    activo: true,
+    inicio: "09:00",
+    fin: "13:00",
+    inicio2: "15:00",
+    fin2: "20:00",
+  },
+
+  sabado: {
+    activo: true,
+    inicio: "09:00",
+    fin: "13:00",
+    inicio2: "",
+    fin2: "",
+  },
+
+  domingo: {
+    activo: false,
+    inicio: "",
+    fin: "",
+    inicio2: "",
+    fin2: "",
+  },
+};
+
+function AppProvider({ children }) {
   // ==========================
   // CLIENTES
   // ==========================
@@ -64,7 +121,32 @@ function AppProvider({ children }) {
   });
 
   // ==========================
-  // GUARDAR EN LOCALSTORAGE
+  // HORARIOS
+  // ==========================
+
+  const [horarios, setHorarios] = useState(() => {
+    const datos = localStorage.getItem("horarios");
+
+    if (!datos) {
+      return horariosPorDefecto;
+    }
+
+    try {
+      const guardados = JSON.parse(datos);
+
+      // Combina lo guardado con los horarios por defecto.
+      // Así nunca desaparece un día por una configuración vieja.
+      return {
+        ...horariosPorDefecto,
+        ...guardados,
+      };
+    } catch {
+      return horariosPorDefecto;
+    }
+  });
+
+  // ==========================
+  // GUARDAR CLIENTES
   // ==========================
 
   useEffect(() => {
@@ -74,6 +156,10 @@ function AppProvider({ children }) {
     );
   }, [clientes]);
 
+  // ==========================
+  // GUARDAR SERVICIOS
+  // ==========================
+
   useEffect(() => {
     localStorage.setItem(
       "servicios",
@@ -81,12 +167,27 @@ function AppProvider({ children }) {
     );
   }, [servicios]);
 
+  // ==========================
+  // GUARDAR TURNOS
+  // ==========================
+
   useEffect(() => {
     localStorage.setItem(
       "turnos",
       JSON.stringify(turnos)
     );
   }, [turnos]);
+
+  // ==========================
+  // GUARDAR HORARIOS
+  // ==========================
+
+  useEffect(() => {
+    localStorage.setItem(
+      "horarios",
+      JSON.stringify(horarios)
+    );
+  }, [horarios]);
 
   // ==========================
   // CONTEXT
@@ -103,6 +204,9 @@ function AppProvider({ children }) {
 
         turnos,
         setTurnos,
+
+        horarios,
+        setHorarios,
       }}
     >
       {children}

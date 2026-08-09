@@ -16,18 +16,52 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import AppContext from "../context/AppContext";
 
 function Turnos() {
-  const { clientes, servicios, turnos, setTurnos } =
-    useContext(AppContext);
+  const {
+    clientes,
+    servicios,
+    turnos,
+    setTurnos,
+  } = useContext(AppContext);
 
-  const [cliente, setCliente] = useState("");
-  const [servicio, setServicio] = useState("");
-  const [fecha, setFecha] = useState("");
-  const [hora, setHora] = useState("");
-  const [estado, setEstado] = useState("Pendiente");
-  const [busqueda, setBusqueda] = useState("");
+  // ==========================
+  // FORMULARIO
+  // ==========================
 
-  const [modoEdicion, setModoEdicion] = useState(false);
-  const [idEditar, setIdEditar] = useState(null);
+  const [cliente, setCliente] =
+    useState("");
+
+  const [servicio, setServicio] =
+    useState("");
+
+  const [fecha, setFecha] =
+    useState("");
+
+  const [hora, setHora] =
+    useState("");
+
+  const [estado, setEstado] =
+    useState("Pendiente");
+
+  // ==========================
+  // BÚSQUEDA
+  // ==========================
+
+  const [busqueda, setBusqueda] =
+    useState("");
+
+  // ==========================
+  // EDICIÓN
+  // ==========================
+
+  const [modoEdicion, setModoEdicion] =
+    useState(false);
+
+  const [idEditar, setIdEditar] =
+    useState(null);
+
+  // ==========================
+  // LIMPIAR FORMULARIO
+  // ==========================
 
   const limpiarFormulario = () => {
     setCliente("");
@@ -35,45 +69,82 @@ function Turnos() {
     setFecha("");
     setHora("");
     setEstado("Pendiente");
+
     setModoEdicion(false);
     setIdEditar(null);
   };
 
+  // ==========================
+  // AGREGAR / ACTUALIZAR
+  // ==========================
+
   const agregarTurno = () => {
-    if (!cliente || !servicio || !fecha || !hora) {
-      toast.error("Complete todos los campos");
+    if (
+      !cliente ||
+      !servicio ||
+      !fecha ||
+      !hora
+    ) {
+      toast.error(
+        "Complete todos los campos"
+      );
+
       return;
     }
 
+    // Comprobar horario ocupado
     const existe = turnos.some(
-      (t) =>
-        t.fecha === fecha &&
-        t.hora === hora &&
-        (!modoEdicion || t.id !== idEditar)
+      (turno) =>
+        turno.fecha === fecha &&
+        turno.hora === hora &&
+        (
+          !modoEdicion ||
+          turno.id !== idEditar
+        ) &&
+        turno.estado !== "Cancelado"
     );
 
     if (existe) {
-      toast.warning("Ese horario ya está ocupado");
+      toast.warning(
+        "Ese horario ya está ocupado"
+      );
+
       return;
     }
 
+    // ==========================
+    // ACTUALIZAR
+    // ==========================
+
     if (modoEdicion) {
-      const turnosActualizados = turnos.map((turno) =>
-        turno.id === idEditar
-          ? {
-              ...turno,
-              cliente,
-              servicio,
-              fecha,
-              hora,
-              estado,
-            }
-          : turno
+      const turnosActualizados =
+        turnos.map((turno) =>
+          turno.id === idEditar
+            ? {
+                ...turno,
+                cliente,
+                servicio,
+                fecha,
+                hora,
+                estado,
+              }
+            : turno
+        );
+
+      setTurnos(
+        turnosActualizados
       );
 
-      setTurnos(turnosActualizados);
-      toast.info("Turno actualizado correctamente");
-    } else {
+      toast.info(
+        "Turno actualizado correctamente"
+      );
+    }
+
+    // ==========================
+    // CREAR
+    // ==========================
+
+    else {
       const nuevoTurno = {
         id: Date.now(),
         cliente,
@@ -83,23 +154,58 @@ function Turnos() {
         estado,
       };
 
-      setTurnos([...turnos, nuevoTurno]);
-      toast.success("Turno agregado correctamente");
+      setTurnos([
+        ...turnos,
+        nuevoTurno,
+      ]);
+
+      toast.success(
+        "Turno agregado correctamente"
+      );
     }
 
     limpiarFormulario();
   };
 
+  // ==========================
+  // EDITAR
+  // ==========================
+
   const editarTurno = (turno) => {
-    setCliente(turno.cliente);
-    setServicio(turno.servicio);
-    setFecha(turno.fecha);
-    setHora(turno.hora);
-    setEstado(turno.estado);
+    setCliente(
+      turno.cliente || ""
+    );
+
+    setServicio(
+      turno.servicio || ""
+    );
+
+    setFecha(
+      turno.fecha || ""
+    );
+
+    setHora(
+      turno.hora || ""
+    );
+
+    setEstado(
+      turno.estado || "Pendiente"
+    );
+
+    setIdEditar(turno.id);
 
     setModoEdicion(true);
-    setIdEditar(turno.id);
+
+    // Llevar el formulario hacia arriba
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
+
+  // ==========================
+  // ELIMINAR
+  // ==========================
 
   const eliminarTurno = (id) => {
     Swal.fire({
@@ -109,46 +215,123 @@ function Turnos() {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6c757d",
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
+      confirmButtonText:
+        "Sí, eliminar",
+      cancelButtonText:
+        "Cancelar",
     }).then((result) => {
-      if (result.isConfirmed) {
-        setTurnos(turnos.filter((t) => t.id !== id));
-
-        toast.success("Turno eliminado correctamente");
+      if (!result.isConfirmed) {
+        return;
       }
+
+      setTurnos(
+        turnos.filter(
+          (turno) =>
+            turno.id !== id
+        )
+      );
+
+      // Si justo estábamos editando
+      // ese turno, limpiamos.
+      if (idEditar === id) {
+        limpiarFormulario();
+      }
+
+      toast.success(
+        "Turno eliminado correctamente"
+      );
     });
   };
 
-  const turnosFiltrados = turnos.filter((turno) => {
-    const texto = busqueda.toLowerCase();
+  // ==========================
+  // FILTRAR TURNOS
+  // ==========================
 
-    return (
-      turno.cliente.toLowerCase().includes(texto) ||
-      turno.servicio.toLowerCase().includes(texto) ||
-      turno.fecha.includes(texto) ||
-      turno.hora.includes(texto) ||
-      turno.estado.toLowerCase().includes(texto)
-    );
-  });
+  const textoBusqueda =
+    busqueda.toLowerCase();
+
+  const turnosFiltrados =
+    turnos.filter((turno) => {
+      const clienteTexto =
+        String(
+          turno.cliente || ""
+        ).toLowerCase();
+
+      const servicioTexto =
+        String(
+          turno.servicio || ""
+        ).toLowerCase();
+
+      const fechaTexto =
+        String(
+          turno.fecha || ""
+        ).toLowerCase();
+
+      const horaTexto =
+        String(
+          turno.hora || ""
+        ).toLowerCase();
+
+      const estadoTexto =
+        String(
+          turno.estado || ""
+        ).toLowerCase();
+
+      return (
+        clienteTexto.includes(
+          textoBusqueda
+        ) ||
+        servicioTexto.includes(
+          textoBusqueda
+        ) ||
+        fechaTexto.includes(
+          textoBusqueda
+        ) ||
+        horaTexto.includes(
+          textoBusqueda
+        ) ||
+        estadoTexto.includes(
+          textoBusqueda
+        )
+      );
+    });
+
+  // ==========================
+  // RENDER
+  // ==========================
 
   return (
     <DashboardLayout>
 
+      {/* ==========================
+          TÍTULO
+      ========================== */}
+
       <h2 className="mb-4 d-flex align-items-center">
+
         <FaCalendarAlt className="me-2" />
+
         Gestión de Turnos
+
       </h2>
 
-      {/* FORMULARIO */}
+      {/* ==========================
+          FORMULARIO
+      ========================== */}
 
       <div className="card shadow p-4 mb-4">
 
         <h4 className="mb-3">
-          {modoEdicion ? "Editar Turno" : "Nuevo Turno"}
+
+          {modoEdicion
+            ? "Editar Turno"
+            : "Nuevo Turno"}
+
         </h4>
 
         <div className="row g-3">
+
+          {/* CLIENTE */}
 
           <div className="col-md-4">
 
@@ -159,24 +342,39 @@ function Turnos() {
             <select
               className="form-select"
               value={cliente}
-              onChange={(e) => setCliente(e.target.value)}
+              onChange={(e) =>
+                setCliente(
+                  e.target.value
+                )
+              }
             >
+
               <option value="">
                 Seleccione un cliente
               </option>
 
-              {clientes.map((c) => (
-                <option
-                  key={c.id}
-                  value={c.nombre}
-                >
-                  {c.nombre}
-                </option>
-              ))}
+              {clientes.map(
+                (clienteActual) => (
+                  <option
+                    key={
+                      clienteActual.id
+                    }
+                    value={
+                      clienteActual.nombre
+                    }
+                  >
+                    {
+                      clienteActual.nombre
+                    }
+                  </option>
+                )
+              )}
 
             </select>
 
           </div>
+
+          {/* SERVICIO */}
 
           <div className="col-md-4">
 
@@ -187,24 +385,39 @@ function Turnos() {
             <select
               className="form-select"
               value={servicio}
-              onChange={(e) => setServicio(e.target.value)}
+              onChange={(e) =>
+                setServicio(
+                  e.target.value
+                )
+              }
             >
+
               <option value="">
                 Seleccione un servicio
               </option>
 
-              {servicios.map((s) => (
-                <option
-                  key={s.id}
-                  value={s.nombre}
-                >
-                  {s.nombre}
-                </option>
-              ))}
+              {servicios.map(
+                (servicioActual) => (
+                  <option
+                    key={
+                      servicioActual.id
+                    }
+                    value={
+                      servicioActual.nombre
+                    }
+                  >
+                    {
+                      servicioActual.nombre
+                    }
+                  </option>
+                )
+              )}
 
             </select>
 
           </div>
+
+          {/* FECHA */}
 
           <div className="col-md-2">
 
@@ -216,10 +429,16 @@ function Turnos() {
               type="date"
               className="form-control"
               value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
+              onChange={(e) =>
+                setFecha(
+                  e.target.value
+                )
+              }
             />
 
           </div>
+
+          {/* HORA */}
 
           <div className="col-md-2">
 
@@ -231,10 +450,16 @@ function Turnos() {
               type="time"
               className="form-control"
               value={hora}
-              onChange={(e) => setHora(e.target.value)}
+              onChange={(e) =>
+                setHora(
+                  e.target.value
+                )
+              }
             />
 
           </div>
+
+          {/* ESTADO */}
 
           <div className="col-md-4">
 
@@ -245,44 +470,86 @@ function Turnos() {
             <select
               className="form-select"
               value={estado}
-              onChange={(e) => setEstado(e.target.value)}
+              onChange={(e) =>
+                setEstado(
+                  e.target.value
+                )
+              }
             >
-              <option>Pendiente</option>
-              <option>Confirmado</option>
-              <option>Cancelado</option>
+
+              <option value="Pendiente">
+                Pendiente
+              </option>
+
+              <option value="Confirmado">
+                Confirmado
+              </option>
+
+              <option value="Cancelado">
+                Cancelado
+              </option>
+
             </select>
 
           </div>
 
+          {/* BOTONES */}
+
           <div className="col-md-8 d-flex align-items-end">
 
-            {modoEdicion ? (
-              <>
-                <button
-                  className="btn btn-warning me-2"
-                  onClick={agregarTurno}
-                >
-                  <FaSave className="me-2" />
-                  Actualizar
-                </button>
+            {/* CONTENEDOR ESTABLE */}
 
+            <div className="d-flex gap-2">
+
+              {modoEdicion && (
                 <button
-                  className="btn btn-secondary"
-                  onClick={limpiarFormulario}
+                  type="button"
+                  className="btn btn-warning"
+                  onClick={
+                    agregarTurno
+                  }
                 >
-                  <FaTimes className="me-2" />
-                  Cancelar
+
+                  <FaSave className="me-2" />
+
+                  Actualizar
+
                 </button>
-              </>
-            ) : (
-              <button
-                className="btn btn-success"
-                onClick={agregarTurno}
-              >
-                <FaPlus className="me-2" />
-                Agregar Turno
-              </button>
-            )}
+              )}
+
+              {modoEdicion && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={
+                    limpiarFormulario
+                  }
+                >
+
+                  <FaTimes className="me-2" />
+
+                  Cancelar
+
+                </button>
+              )}
+
+              {!modoEdicion && (
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={
+                    agregarTurno
+                  }
+                >
+
+                  <FaPlus className="me-2" />
+
+                  Agregar Turno
+
+                </button>
+              )}
+
+            </div>
 
           </div>
 
@@ -290,7 +557,9 @@ function Turnos() {
 
       </div>
 
-      {/* BÚSQUEDA */}
+      {/* ==========================
+          BÚSQUEDA
+      ========================== */}
 
       <div className="mb-4 position-relative">
 
@@ -299,7 +568,8 @@ function Turnos() {
             position: "absolute",
             left: "14px",
             top: "50%",
-            transform: "translateY(-50%)",
+            transform:
+              "translateY(-50%)",
             color: "#6c757d",
           }}
         />
@@ -312,112 +582,177 @@ function Turnos() {
           }}
           placeholder="Buscar por cliente, servicio, fecha, hora o estado..."
           value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
+          onChange={(e) =>
+            setBusqueda(
+              e.target.value
+            )
+          }
         />
 
       </div>
 
-      {/* TABLA */}
+      {/* ==========================
+          TABLA
+      ========================== */}
 
-      <table className="table table-striped table-hover shadow">
+      <div className="table-responsive">
 
-        <thead className="table-dark">
+        <table className="table table-striped table-hover shadow">
 
-          <tr>
-            <th>Cliente</th>
-            <th>Servicio</th>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-
-        </thead>
-
-        <tbody>
-
-          {turnosFiltrados.length === 0 ? (
+          <thead className="table-dark">
 
             <tr>
 
-              <td
-                colSpan="6"
-                className="text-center"
-              >
-                No hay turnos registrados.
-              </td>
+              <th>
+                Cliente
+              </th>
+
+              <th>
+                Servicio
+              </th>
+
+              <th>
+                Fecha
+              </th>
+
+              <th>
+                Hora
+              </th>
+
+              <th>
+                Estado
+              </th>
+
+              <th>
+                Acciones
+              </th>
 
             </tr>
 
-          ) : (
+          </thead>
 
-            turnosFiltrados.map((turno) => (
+          <tbody>
 
-              <tr key={turno.id}>
+            {turnosFiltrados.length ===
+            0 ? (
 
-                <td>
-                  {turno.cliente}
-                </td>
+              <tr>
 
-                <td>
-                  {turno.servicio}
-                </td>
-
-                <td>
-                  {turno.fecha}
-                </td>
-
-                <td>
-                  {turno.hora}
-                </td>
-
-                <td>
-
-                  <span
-                    className={`badge ${
-                      turno.estado === "Confirmado"
-                        ? "bg-success"
-                        : turno.estado === "Cancelado"
-                        ? "bg-danger"
-                        : "bg-warning text-dark"
-                    }`}
-                  >
-                    {turno.estado}
-                  </span>
-
-                </td>
-
-                <td>
-
-                  <button
-                    className="btn btn-warning btn-sm me-2"
-                    onClick={() => editarTurno(turno)}
-                  >
-                    <FaEdit className="me-1" />
-                    Editar
-                  </button>
-
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() =>
-                      eliminarTurno(turno.id)
-                    }
-                  >
-                    <FaTrash className="me-1" />
-                    Eliminar
-                  </button>
-
+                <td
+                  colSpan="6"
+                  className="text-center"
+                >
+                  No hay turnos
+                  registrados.
                 </td>
 
               </tr>
 
-            ))
+            ) : (
 
-          )}
+              turnosFiltrados.map(
+                (turno) => (
 
-        </tbody>
+                  <tr
+                    key={turno.id}
+                  >
 
-      </table>
+                    <td>
+                      {
+                        turno.cliente
+                      }
+                    </td>
+
+                    <td>
+                      {
+                        turno.servicio
+                      }
+                    </td>
+
+                    <td>
+                      {
+                        turno.fecha
+                      }
+                    </td>
+
+                    <td>
+                      {
+                        turno.hora
+                      }
+                    </td>
+
+                    <td>
+
+                      <span
+                        className={`badge ${
+                          turno.estado ===
+                          "Confirmado"
+                            ? "bg-success"
+                            : turno.estado ===
+                              "Cancelado"
+                            ? "bg-danger"
+                            : "bg-warning text-dark"
+                        }`}
+                      >
+                        {
+                          turno.estado
+                        }
+                      </span>
+
+                    </td>
+
+                    <td>
+
+                      <div className="d-flex gap-2">
+
+                        <button
+                          type="button"
+                          className="btn btn-warning btn-sm"
+                          onClick={() =>
+                            editarTurno(
+                              turno
+                            )
+                          }
+                        >
+
+                          <FaEdit className="me-1" />
+
+                          Editar
+
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm"
+                          onClick={() =>
+                            eliminarTurno(
+                              turno.id
+                            )
+                          }
+                        >
+
+                          <FaTrash className="me-1" />
+
+                          Eliminar
+
+                        </button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                )
+              )
+
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
 
     </DashboardLayout>
   );

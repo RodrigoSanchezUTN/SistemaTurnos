@@ -8,6 +8,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import PerfilCard from "../components/configuracion/PerfilCard";
 import NegocioCard from "../components/configuracion/NegocioCard";
 import AparienciaCard from "../components/configuracion/AparienciaCard";
+import HorariosCard from "../components/configuracion/HorariosCard";
 
 function Configuracion() {
   const [searchParams] = useSearchParams();
@@ -49,6 +50,12 @@ function Configuracion() {
         {/* CONFIGURACIONES */}
 
         <div className="row g-4">
+
+          {/* HORARIOS */}
+
+<div className="col-lg-6">
+  <HorariosCard />
+</div>
 
           {/* PERFIL */}
 
