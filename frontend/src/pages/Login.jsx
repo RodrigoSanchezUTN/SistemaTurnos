@@ -1,6 +1,13 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
+
+import {
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
+
 import { FaGoogle } from "react-icons/fa";
 
 import { auth } from "../firebase";
@@ -10,7 +17,12 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [cargando, setCargando] = useState(false);
+  const [recordarme, setRecordarme] =
+    useState(false);
+
+  const [cargando, setCargando] =
+    useState(false);
+
   const [cargandoGoogle, setCargandoGoogle] =
     useState(false);
 
@@ -42,7 +54,8 @@ function Login() {
       // =========================
 
       if (
-        emailIngresado === "admin@turnify.com" &&
+        emailIngresado ===
+          "admin@turnify.com" &&
         password === "123456"
       ) {
         iniciarSesion({
@@ -55,6 +68,17 @@ function Login() {
         navigate("/dashboard");
         return;
       }
+
+      // =========================
+      // PERSISTENCIA FIREBASE
+      // =========================
+
+      await setPersistence(
+        auth,
+        recordarme
+          ? browserLocalPersistence
+          : browserSessionPersistence
+      );
 
       // =========================
       // FIREBASE
@@ -99,6 +123,7 @@ function Login() {
 
         navigate("/verificar-correo", {
           replace: true,
+
           state: {
             email:
               usuarioFirebase.email ||
@@ -184,6 +209,7 @@ function Login() {
           "No se pudo iniciar sesión. Intentá nuevamente."
         );
       }
+
     } finally {
       setCargando(false);
     }
@@ -196,6 +222,21 @@ function Login() {
   const iniciarGoogle = async () => {
     try {
       setCargandoGoogle(true);
+
+      // =========================
+      // PERSISTENCIA FIREBASE
+      // =========================
+
+      await setPersistence(
+        auth,
+        recordarme
+          ? browserLocalPersistence
+          : browserSessionPersistence
+      );
+
+      // =========================
+      // LOGIN GOOGLE
+      // =========================
 
       await iniciarSesionConGoogle();
 
@@ -210,6 +251,7 @@ function Login() {
       alert(
         "No se pudo iniciar sesión con Google. Intentá nuevamente."
       );
+
     } finally {
       setCargandoGoogle(false);
     }
@@ -232,7 +274,9 @@ function Login() {
         }}
       >
 
-        {/* ENCABEZADO */}
+        {/* =========================
+            ENCABEZADO
+        ========================= */}
 
         <div className="text-center mb-4">
 
@@ -255,7 +299,9 @@ function Login() {
 
         </div>
 
-        {/* EMAIL */}
+        {/* =========================
+            EMAIL
+        ========================= */}
 
         <div className="mb-3">
 
@@ -278,9 +324,11 @@ function Login() {
 
         </div>
 
-        {/* CONTRASEÑA */}
+        {/* =========================
+            CONTRASEÑA
+        ========================= */}
 
-        <div className="mb-3">
+        <div className="mb-2">
 
           <label className="form-label fw-semibold">
             Contraseña
@@ -301,7 +349,41 @@ function Login() {
 
         </div>
 
-        {/* LOGIN */}
+        {/* =========================
+            RECORDARME
+        ========================= */}
+
+        <div className="form-check mb-3">
+
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="recordarme"
+            checked={recordarme}
+            onChange={(e) =>
+              setRecordarme(
+                e.target.checked
+              )
+            }
+          />
+
+          <label
+  className="form-check-label"
+  htmlFor="recordarme"
+  translate="no"
+  style={{
+    cursor: "pointer",
+    userSelect: "none",
+  }}
+>
+  Recordarme
+</label>
+
+        </div>
+
+        {/* =========================
+            LOGIN
+        ========================= */}
 
         <button
           type="button"
@@ -320,7 +402,9 @@ function Login() {
             : "Iniciar sesión"}
         </button>
 
-        {/* REGISTRO */}
+        {/* =========================
+            REGISTRO
+        ========================= */}
 
         <div className="text-center mt-3">
 
@@ -340,7 +424,9 @@ function Login() {
 
         </div>
 
-        {/* SEPARADOR */}
+        {/* =========================
+            SEPARADOR
+        ========================= */}
 
         <div className="d-flex align-items-center my-3">
 
@@ -371,7 +457,9 @@ function Login() {
 
         </div>
 
-        {/* GOOGLE */}
+        {/* =========================
+            GOOGLE
+        ========================= */}
 
         <button
           type="button"
@@ -392,7 +480,9 @@ function Login() {
 
         </button>
 
-        {/* FOOTER */}
+        {/* =========================
+            FOOTER
+        ========================= */}
 
         <p
           className="text-center text-muted mt-3 mb-0"

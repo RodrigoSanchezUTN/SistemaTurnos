@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -6,6 +6,8 @@ import {
   updateProfile,
   sendEmailVerification,
 } from "firebase/auth";
+
+import ReCAPTCHA from "react-google-recaptcha";
 
 import {
   FaUser,
@@ -23,6 +25,8 @@ function Registro() {
   const { iniciarSesion } =
     useContext(UsuarioContext);
 
+  const recaptchaRef = useRef(null);
+
   const [nombre, setNombre] =
     useState("");
 
@@ -37,6 +41,9 @@ function Registro() {
 
   const [confirmarPassword, setConfirmarPassword] =
     useState("");
+
+  const [captchaValido, setCaptchaValido] =
+    useState(false);
 
   const [cargando, setCargando] =
     useState(false);
@@ -95,6 +102,17 @@ function Registro() {
       return;
     }
 
+    // ==========================
+    // CAPTCHA
+    // ==========================
+
+    if (!captchaValido) {
+      alert(
+        "Confirmá que no sos un robot."
+      );
+      return;
+    }
+
     try {
       setCargando(true);
 
@@ -137,7 +155,8 @@ function Registro() {
       // ==========================
 
       const datosUsuario = {
-        nombre: nombre.trim(),
+        nombre:
+          nombre.trim(),
 
         email:
           usuarioFirebase.email ||
@@ -155,8 +174,6 @@ function Registro() {
         proveedor: "email",
       };
 
-      // Guardamos temporalmente
-      // los datos del usuario.
       iniciarSesion(
         datosUsuario
       );
@@ -208,10 +225,26 @@ function Registro() {
           "No se pudo crear la cuenta. Intentá nuevamente."
         );
       }
+
+      // Reiniciar CAPTCHA
+      recaptchaRef.current?.reset();
+      setCaptchaValido(false);
+
     } finally {
       setCargando(false);
     }
   };
+
+  // ==========================
+  // CAPTCHA
+  // ==========================
+
+  const cuandoCaptchaCambia =
+    (valor) => {
+      setCaptchaValido(
+        Boolean(valor)
+      );
+    };
 
   return (
     <div
@@ -233,7 +266,9 @@ function Registro() {
         }}
       >
 
-        {/* ENCABEZADO */}
+        {/* ==========================
+            ENCABEZADO
+        ========================== */}
 
         <div className="text-center mb-4">
 
@@ -256,7 +291,9 @@ function Registro() {
 
         </div>
 
-        {/* NOMBRE */}
+        {/* ==========================
+            NOMBRE
+        ========================== */}
 
         <div className="mb-3">
 
@@ -285,7 +322,9 @@ function Registro() {
 
         </div>
 
-        {/* EMAIL */}
+        {/* ==========================
+            EMAIL
+        ========================== */}
 
         <div className="mb-3">
 
@@ -314,7 +353,9 @@ function Registro() {
 
         </div>
 
-        {/* TELÉFONO */}
+        {/* ==========================
+            TELÉFONO
+        ========================== */}
 
         <div className="mb-3">
 
@@ -343,7 +384,9 @@ function Registro() {
 
         </div>
 
-        {/* CONTRASEÑA */}
+        {/* ==========================
+            CONTRASEÑA
+        ========================== */}
 
         <div className="mb-3">
 
@@ -372,7 +415,9 @@ function Registro() {
 
         </div>
 
-        {/* CONFIRMAR */}
+        {/* ==========================
+            CONFIRMAR
+        ========================== */}
 
         <div className="mb-4">
 
@@ -403,7 +448,25 @@ function Registro() {
 
         </div>
 
-        {/* CREAR CUENTA */}
+        {/* ==========================
+            CAPTCHA
+        ========================== */}
+
+        <div className="d-flex justify-content-center mb-4">
+
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey="6LcbuX8tAAAAAAA0ItIb5Ox0Mf-yXxVeXwkMhJB0"
+            onChange={
+              cuandoCaptchaCambia
+            }
+          />
+
+        </div>
+
+        {/* ==========================
+            CREAR CUENTA
+        ========================== */}
 
         <button
           type="button"
@@ -422,7 +485,9 @@ function Registro() {
             : "Crear cuenta"}
         </button>
 
-        {/* VOLVER */}
+        {/* ==========================
+            VOLVER
+        ========================== */}
 
         <div className="text-center mt-3">
 
@@ -441,6 +506,10 @@ function Registro() {
           </button>
 
         </div>
+
+        {/* ==========================
+            FOOTER
+        ========================== */}
 
         <p
           className="text-center text-muted mt-3 mb-0"

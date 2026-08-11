@@ -4,6 +4,7 @@ import {
   FaCog,
   FaSignOutAlt,
   FaChevronDown,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 
 import { useNavigate } from "react-router-dom";
@@ -24,8 +25,6 @@ function AvatarUsuario({
   const [imagenError, setImagenError] =
     useState(false);
 
-  // Si no hay foto o la imagen no pudo cargar,
-  // mostramos la inicial.
   if (!foto || imagenError) {
     return (
       <div
@@ -83,6 +82,9 @@ function UsuarioLayout({ children }) {
   const [menuAbierto, setMenuAbierto] =
     useState(false);
 
+  const [mostrarConfirmacion, setMostrarConfirmacion] =
+    useState(false);
+
   const nombre =
     usuario?.nombre || "Usuario";
 
@@ -96,15 +98,34 @@ function UsuarioLayout({ children }) {
     nombre.charAt(0).toUpperCase();
 
   // ==========================
-  // CERRAR SESIÓN
+  // MOSTRAR CONFIRMACIÓN
   // ==========================
 
   const manejarCerrarSesion = () => {
+    setMenuAbierto(false);
+    setMostrarConfirmacion(true);
+  };
+
+  // ==========================
+  // CONFIRMAR CIERRE
+  // ==========================
+
+  const confirmarCerrarSesion = () => {
+    setMostrarConfirmacion(false);
+
     cerrarSesion();
 
     navigate("/", {
       replace: true,
     });
+  };
+
+  // ==========================
+  // CANCELAR CIERRE
+  // ==========================
+
+  const cancelarCerrarSesion = () => {
+    setMostrarConfirmacion(false);
   };
 
   // ==========================
@@ -118,230 +139,320 @@ function UsuarioLayout({ children }) {
   };
 
   return (
-    <div
-      className="d-flex"
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#f8f9fa",
-      }}
-    >
-      {/* SIDEBAR */}
-
-      <UsuarioSidebar />
-
-      {/* CONTENIDO */}
-
-      <main
-        className="flex-grow-1"
+    <>
+      <div
+        className="d-flex"
         style={{
-          minWidth: 0,
+          minHeight: "100vh",
+          backgroundColor: "#f8f9fa",
         }}
       >
-        {/* ==========================
-            BARRA SUPERIOR
-        ========================== */}
+        {/* SIDEBAR */}
 
-        <div
-          className="bg-white border-bottom px-4 py-3"
+        <UsuarioSidebar />
+
+        {/* CONTENIDO */}
+
+        <main
+          className="flex-grow-1"
           style={{
-            minHeight: "76px",
+            minWidth: 0,
+          }}
+        >
+          {/* ==========================
+              BARRA SUPERIOR
+          ========================== */}
+
+          <div
+            className="bg-white border-bottom px-4 py-3"
+            style={{
+              minHeight: "76px",
+            }}
+          >
+            <div
+              className="d-flex justify-content-end align-items-center"
+              style={{
+                height: "100%",
+                position: "relative",
+              }}
+            >
+              {/* USUARIO */}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setMenuAbierto(
+                    !menuAbierto
+                  )
+                }
+                className="btn border-0 bg-transparent d-flex align-items-center p-2"
+                style={{
+                  gap: "12px",
+                  borderRadius: "12px",
+                }}
+              >
+                {/* AVATAR */}
+
+                <AvatarUsuario
+                  foto={foto}
+                  nombre={nombre}
+                  inicial={inicial}
+                  tamaño={44}
+                />
+
+                {/* DATOS */}
+
+                <div
+                  className="d-flex flex-column text-start"
+                  style={{
+                    lineHeight: "1.2",
+                  }}
+                >
+                  <span
+                    className="fw-bold"
+                    style={{
+                      fontSize: "15px",
+                    }}
+                  >
+                    {nombre}
+                  </span>
+
+                  <span
+                    className="text-muted"
+                    style={{
+                      fontSize: "13px",
+                    }}
+                  >
+                    {email}
+                  </span>
+                </div>
+
+                {/* FLECHA */}
+
+                <FaChevronDown
+                  size={13}
+                  style={{
+                    marginLeft: "4px",
+                  }}
+                />
+              </button>
+
+              {/* ==========================
+                  MENÚ DESPLEGABLE
+              ========================== */}
+
+              {menuAbierto && (
+                <div
+                  className="position-absolute bg-white shadow-lg border rounded-4"
+                  style={{
+                    top: "65px",
+                    right: "16px",
+                    width: "240px",
+                    zIndex: 1000,
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* CABECERA */}
+
+                  <div className="p-3 border-bottom">
+                    <div className="d-flex align-items-center gap-2">
+
+                      <AvatarUsuario
+                        foto={foto}
+                        nombre={nombre}
+                        inicial={inicial}
+                        tamaño={42}
+                      />
+
+                      <div
+                        className="text-truncate"
+                        style={{
+                          minWidth: 0,
+                        }}
+                      >
+                        <div className="fw-bold text-truncate">
+                          {nombre}
+                        </div>
+
+                        <small className="text-muted text-truncate d-block">
+                          {email}
+                        </small>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* MI PERFIL */}
+
+                  <button
+                    type="button"
+                    onClick={irAlPerfil}
+                    className="btn w-100 text-start border-0 rounded-0 px-3 py-3"
+                    style={{
+                      background: "white",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background =
+                        "#f8f9fa";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background =
+                        "white";
+                    }}
+                  >
+                    <FaUser className="me-3" />
+
+                    Mi perfil
+                  </button>
+
+                  {/* CONFIGURACIÓN */}
+
+<button
+  type="button"
+  onClick={() => {
+    setMenuAbierto(false);
+    navigate("/usuario/configuracion");
+  }}
+  className="btn w-100 text-start border-0 rounded-0 px-3 py-3"
+  style={{
+    background: "white",
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.background =
+      "#f8f9fa";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.background =
+      "white";
+  }}
+>
+  <FaCog className="me-3" />
+
+  Configuración
+</button>
+
+                  {/* CERRAR SESIÓN */}
+
+                  <div className="border-top">
+                    <button
+                      type="button"
+                      onClick={
+                        manejarCerrarSesion
+                      }
+                      className="btn btn-danger w-100 text-start border-0 rounded-0 px-3 py-3"
+                    >
+                      <FaSignOutAlt className="me-3" />
+
+                      Cerrar sesión
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* CONTENIDO */}
+
+          <div className="p-4">
+            {children}
+          </div>
+        </main>
+      </div>
+
+      {/* ==========================
+          MODAL CONFIRMAR CIERRE
+      ========================== */}
+
+      {mostrarConfirmacion && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+          style={{
+            backgroundColor:
+              "rgba(0, 0, 0, 0.45)",
+            zIndex: 2000,
+            padding: "20px",
           }}
         >
           <div
-            className="d-flex justify-content-end align-items-center"
+            className="bg-white shadow-lg rounded-4"
             style={{
-              height: "100%",
-              position: "relative",
+              width: "420px",
+              maxWidth: "100%",
+              padding: "30px",
             }}
           >
-            {/* ==========================
-                USUARIO
-            ========================== */}
+            {/* ICONO */}
 
-            <button
-              type="button"
-              onClick={() =>
-                setMenuAbierto(
-                  !menuAbierto
-                )
-              }
-              className="btn border-0 bg-transparent d-flex align-items-center p-2"
-              style={{
-                gap: "12px",
-                borderRadius: "12px",
-              }}
-            >
-              {/* AVATAR */}
-
-              <AvatarUsuario
-                foto={foto}
-                nombre={nombre}
-                inicial={inicial}
-                tamaño={44}
-              />
-
-              {/* DATOS */}
+            <div className="text-center mb-3">
 
               <div
-                className="d-flex flex-column text-start"
+                className="d-flex justify-content-center align-items-center mx-auto"
                 style={{
-                  lineHeight: "1.2",
+                  width: "64px",
+                  height: "64px",
+                  borderRadius: "50%",
+                  background:
+                    "#fff3cd",
                 }}
               >
-                <span
-                  className="fw-bold"
+                <FaExclamationTriangle
+                  size={28}
                   style={{
-                    fontSize: "15px",
+                    color: "#f59e0b",
                   }}
-                >
-                  {nombre}
-                </span>
-
-                <span
-                  className="text-muted"
-                  style={{
-                    fontSize: "13px",
-                  }}
-                >
-                  {email}
-                </span>
+                />
               </div>
 
-              {/* FLECHA */}
+            </div>
 
-              <FaChevronDown
-                size={13}
+            {/* TITULO */}
+
+            <h4 className="text-center fw-bold mb-2">
+              ¿Cerrar sesión?
+            </h4>
+
+            <p className="text-center text-muted mb-4">
+              ¿Estás seguro de que querés
+              cerrar tu sesión?
+            </p>
+
+            {/* BOTONES */}
+
+            <div className="d-flex gap-2">
+
+              <button
+                type="button"
+                className="btn btn-light border w-50"
                 style={{
-                  marginLeft: "4px",
+                  height: "46px",
+                  fontWeight: "600",
                 }}
-              />
-            </button>
-
-            {/* ==========================
-                MENÚ DESPLEGABLE
-            ========================== */}
-
-            {menuAbierto && (
-              <div
-                className="position-absolute bg-white shadow-lg border rounded-4"
-                style={{
-                  top: "65px",
-                  right: "16px",
-                  width: "240px",
-                  zIndex: 1000,
-                  overflow: "hidden",
-                }}
+                onClick={
+                  cancelarCerrarSesion
+                }
               >
-                {/* ==========================
-                    CABECERA DEL MENÚ
-                ========================== */}
+                Cancelar
+              </button>
 
-                <div className="p-3 border-bottom">
-                  <div className="d-flex align-items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-danger w-50"
+                style={{
+                  height: "46px",
+                  fontWeight: "600",
+                }}
+                onClick={
+                  confirmarCerrarSesion
+                }
+              >
+                Cerrar sesión
+              </button>
 
-                    <AvatarUsuario
-                      foto={foto}
-                      nombre={nombre}
-                      inicial={inicial}
-                      tamaño={42}
-                    />
-
-                    <div
-                      className="text-truncate"
-                      style={{
-                        minWidth: 0,
-                      }}
-                    >
-                      <div className="fw-bold text-truncate">
-                        {nombre}
-                      </div>
-
-                      <small className="text-muted text-truncate d-block">
-                        {email}
-                      </small>
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* ==========================
-                    MI PERFIL
-                ========================== */}
-
-                <button
-                  type="button"
-                  onClick={irAlPerfil}
-                  className="btn w-100 text-start border-0 rounded-0 px-3 py-3"
-                  style={{
-                    background: "white",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background =
-                      "#f8f9fa";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      "white";
-                  }}
-                >
-                  <FaUser className="me-3" />
-
-                  Mi perfil
-                </button>
-
-                {/* ==========================
-                    CONFIGURACIÓN
-                ========================== */}
-
-                <button
-                  type="button"
-                  disabled
-                  className="btn w-100 text-start border-0 rounded-0 px-3 py-3 text-muted"
-                  style={{
-                    background: "white",
-                    cursor: "not-allowed",
-                  }}
-                >
-                  <FaCog className="me-3" />
-
-                  Configuración
-
-                  <small className="ms-2">
-                    Próximamente
-                  </small>
-                </button>
-
-                {/* ==========================
-                    CERRAR SESIÓN
-                ========================== */}
-
-                <div className="border-top">
-                  <button
-                    type="button"
-                    onClick={
-                      manejarCerrarSesion
-                    }
-                    className="btn btn-danger w-100 text-start border-0 rounded-0 px-3 py-3"
-                  >
-                    <FaSignOutAlt className="me-3" />
-
-                    Cerrar sesión
-                  </button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
-
-        {/* ==========================
-            CONTENIDO
-        ========================== */}
-
-        <div className="p-4">
-          {children}
-        </div>
-      </main>
-    </div>
+      )}
+    </>
   );
 }
 

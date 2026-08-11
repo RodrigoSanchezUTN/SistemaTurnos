@@ -15,6 +15,7 @@ import UsuarioDashboard from "../pages/UsuarioDashboard";
 import UsuarioTurnos from "../pages/UsuarioTurnos";
 import UsuarioReservar from "../pages/UsuarioReservar";
 import UsuarioPerfil from "../pages/UsuarioPerfil";
+import UsuarioConfiguracion from "../pages/UsuarioConfiguracion";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -112,6 +113,15 @@ function Router() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/usuario/configuracion"
+  element={
+    <ProtectedRoute rolPermitido="usuario">
+      <UsuarioConfiguracion />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/usuario/turnos"
