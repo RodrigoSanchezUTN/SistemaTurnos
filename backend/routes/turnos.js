@@ -4,19 +4,49 @@ const {
     obtenerTurnos,
     crearTurno,
     actualizarTurno,
+    cambiarEstadoTurno,
     eliminarTurno
 } = require("../controllers/turnosController");
 
 const verificarToken = require("../middleware/authMiddleware");
+const verificarRol = require("../middleware/roleMiddleware");
 
 const router = express.Router();
 
-router.get("/", verificarToken, obtenerTurnos);
+// Ver turnos
+router.get(
+    "/",
+    verificarToken,
+    obtenerTurnos
+);
 
-router.post("/", verificarToken, crearTurno);
+// Crear turno
+router.post(
+    "/",
+    verificarToken,
+    crearTurno
+);
 
-router.put("/:id", verificarToken, actualizarTurno);
+// Modificar turno
+router.put(
+    "/:id",
+    verificarToken,
+    actualizarTurno
+);
 
-router.delete("/:id", verificarToken, eliminarTurno);
+// Cambiar estado
+router.patch(
+    "/:id/estado",
+    verificarToken,
+    cambiarEstadoTurno
+);
+
+// Eliminar turno: solo Administrador
+router.delete(
+    "/:id",
+    verificarToken,
+    verificarRol("Administrador"),
+    eliminarTurno
+);
 
 module.exports = router;

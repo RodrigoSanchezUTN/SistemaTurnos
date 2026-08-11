@@ -1,25 +1,25 @@
 const jwt = require("jsonwebtoken");
 
 const verificarToken = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-        return res.status(401).json({
-            mensaje: "No se proporcionó un token."
-        });
-    }
-
-    const partes = authHeader.split(" ");
-
-    if (partes.length !== 2 || partes[0] !== "Bearer") {
-        return res.status(401).json({
-            mensaje: "Formato de token inválido."
-        });
-    }
-
-    const token = partes[1];
-
     try {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader) {
+            return res.status(401).json({
+                mensaje: "No se proporcionó un token."
+            });
+        }
+
+        const partes = authHeader.split(" ");
+
+        if (partes.length !== 2 || partes[0] !== "Bearer") {
+            return res.status(401).json({
+                mensaje: "El formato del token no es válido."
+            });
+        }
+
+        const token = partes[1];
+
         const usuario = jwt.verify(
             token,
             process.env.JWT_SECRET
@@ -28,9 +28,10 @@ const verificarToken = (req, res, next) => {
         req.usuario = usuario;
 
         next();
+
     } catch (error) {
         return res.status(401).json({
-            mensaje: "Token inválido o expirado."
+            mensaje: "El token no es válido o ha expirado."
         });
     }
 };

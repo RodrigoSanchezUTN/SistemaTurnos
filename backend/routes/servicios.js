@@ -8,15 +8,35 @@ const {
 } = require("../controllers/serviciosController");
 
 const verificarToken = require("../middleware/authMiddleware");
+const verificarRol = require("../middleware/roleMiddleware");
 
 const router = express.Router();
 
+// Cualquier usuario autenticado puede ver los servicios
 router.get("/", verificarToken, obtenerServicios);
 
-router.post("/", verificarToken, crearServicio);
+// Solo Administradores pueden crear servicios
+router.post(
+    "/",
+    verificarToken,
+    verificarRol("Administrador"),
+    crearServicio
+);
 
-router.put("/:id", verificarToken, actualizarServicio);
+// Solo Administradores pueden modificar servicios
+router.put(
+    "/:id",
+    verificarToken,
+    verificarRol("Administrador"),
+    actualizarServicio
+);
 
-router.delete("/:id", verificarToken, eliminarServicio);
+// Solo Administradores pueden eliminar servicios
+router.delete(
+    "/:id",
+    verificarToken,
+    verificarRol("Administrador"),
+    eliminarServicio
+);
 
 module.exports = router;
