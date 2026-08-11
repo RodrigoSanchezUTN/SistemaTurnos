@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+
 import {
   FaUser,
   FaCog,
@@ -138,45 +139,146 @@ function UsuarioLayout({ children }) {
     navigate("/usuario/perfil");
   };
 
+  // ==========================
+  // IR A CONFIGURACIÓN
+  // ==========================
+
+  const irAConfiguracion = () => {
+    setMenuAbierto(false);
+
+    navigate("/usuario/configuracion");
+  };
+
   return (
     <>
+      {/* ==========================
+          ESTILOS RESPONSIVE
+      ========================== */}
+
+      <style>
+        {`
+          .usuario-layout-main {
+            min-width: 0;
+          }
+
+          .usuario-topbar {
+            min-height: 76px;
+          }
+
+          .usuario-topbar-inner {
+            min-height: 50px;
+            position: relative;
+          }
+
+          .usuario-user-button {
+            gap: 12px;
+            border-radius: 12px;
+          }
+
+          .usuario-user-info {
+            display: flex;
+          }
+
+          .usuario-user-menu {
+            top: 65px;
+            right: 16px;
+            width: 240px;
+          }
+
+          .usuario-page-content {
+            padding: 24px;
+          }
+
+          @media (max-width: 768px) {
+            .usuario-topbar {
+              padding-left: 14px !important;
+              padding-right: 14px !important;
+            }
+
+            .usuario-user-button {
+              gap: 8px;
+              padding: 6px !important;
+            }
+
+            .usuario-user-info {
+              display: none !important;
+            }
+
+            .usuario-user-menu {
+              top: 62px;
+              right: 4px;
+              width: min(300px, calc(100vw - 24px));
+            }
+
+            .usuario-page-content {
+              padding: 16px !important;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .usuario-topbar {
+              min-height: 68px;
+              padding-top: 10px !important;
+              padding-bottom: 10px !important;
+            }
+
+            .usuario-user-menu {
+              top: 58px;
+              right: 2px;
+              width: calc(100vw - 20px);
+              max-width: 300px;
+            }
+
+            .usuario-page-content {
+              padding: 12px !important;
+            }
+          }
+        `}
+      </style>
+
+      {/* ==========================
+          CONTENEDOR PRINCIPAL
+      ========================== */}
+
       <div
         className="d-flex"
         style={{
           minHeight: "100vh",
           backgroundColor: "#f8f9fa",
+          width: "100%",
+          overflowX: "hidden",
         }}
       >
-        {/* SIDEBAR */}
+
+        {/* ==========================
+            SIDEBAR
+        ========================== */}
 
         <UsuarioSidebar />
 
-        {/* CONTENIDO */}
+        {/* ==========================
+            CONTENIDO
+        ========================== */}
 
         <main
-          className="flex-grow-1"
-          style={{
-            minWidth: 0,
-          }}
+          className="flex-grow-1 usuario-layout-main"
         >
+
           {/* ==========================
               BARRA SUPERIOR
           ========================== */}
 
           <div
-            className="bg-white border-bottom px-4 py-3"
-            style={{
-              minHeight: "76px",
-            }}
+            className="bg-white border-bottom px-4 py-3 usuario-topbar"
           >
+
             <div
-              className="d-flex justify-content-end align-items-center"
-              style={{
-                height: "100%",
-                position: "relative",
-              }}
+              className="d-flex justify-content-end align-items-center usuario-topbar-inner"
             >
-              {/* USUARIO */}
+
+              {/* ==========================
+                  USUARIO
+              ========================== */}
 
               <button
                 type="button"
@@ -185,12 +287,13 @@ function UsuarioLayout({ children }) {
                     !menuAbierto
                   )
                 }
-                className="btn border-0 bg-transparent d-flex align-items-center p-2"
+                className="btn border-0 bg-transparent d-flex align-items-center usuario-user-button"
                 style={{
-                  gap: "12px",
                   borderRadius: "12px",
+                  maxWidth: "100%",
                 }}
               >
+
                 {/* AVATAR */}
 
                 <AvatarUsuario
@@ -203,11 +306,12 @@ function UsuarioLayout({ children }) {
                 {/* DATOS */}
 
                 <div
-                  className="d-flex flex-column text-start"
+                  className="flex-column text-start usuario-user-info"
                   style={{
                     lineHeight: "1.2",
                   }}
                 >
+
                   <span
                     className="fw-bold"
                     style={{
@@ -218,13 +322,15 @@ function UsuarioLayout({ children }) {
                   </span>
 
                   <span
-                    className="text-muted"
+                    className="text-muted text-truncate"
                     style={{
                       fontSize: "13px",
+                      maxWidth: "220px",
                     }}
                   >
                     {email}
                   </span>
+
                 </div>
 
                 {/* FLECHA */}
@@ -233,8 +339,10 @@ function UsuarioLayout({ children }) {
                   size={13}
                   style={{
                     marginLeft: "4px",
+                    flexShrink: 0,
                   }}
                 />
+
               </button>
 
               {/* ==========================
@@ -242,19 +350,21 @@ function UsuarioLayout({ children }) {
               ========================== */}
 
               {menuAbierto && (
+
                 <div
-                  className="position-absolute bg-white shadow-lg border rounded-4"
+                  className="position-absolute bg-white shadow-lg border rounded-4 usuario-user-menu"
                   style={{
-                    top: "65px",
-                    right: "16px",
-                    width: "240px",
                     zIndex: 1000,
                     overflow: "hidden",
                   }}
                 >
-                  {/* CABECERA */}
+
+                  {/* ==========================
+                      CABECERA
+                  ========================== */}
 
                   <div className="p-3 border-bottom">
+
                     <div className="d-flex align-items-center gap-2">
 
                       <AvatarUsuario
@@ -270,6 +380,7 @@ function UsuarioLayout({ children }) {
                           minWidth: 0,
                         }}
                       >
+
                         <div className="fw-bold text-truncate">
                           {nombre}
                         </div>
@@ -277,12 +388,16 @@ function UsuarioLayout({ children }) {
                         <small className="text-muted text-truncate d-block">
                           {email}
                         </small>
+
                       </div>
 
                     </div>
+
                   </div>
 
-                  {/* MI PERFIL */}
+                  {/* ==========================
+                      MI PERFIL
+                  ========================== */}
 
                   <button
                     type="button"
@@ -300,40 +415,48 @@ function UsuarioLayout({ children }) {
                         "white";
                     }}
                   >
+
                     <FaUser className="me-3" />
 
                     Mi perfil
+
                   </button>
 
-                  {/* CONFIGURACIÓN */}
+                  {/* ==========================
+                      CONFIGURACIÓN
+                  ========================== */}
 
-<button
-  type="button"
-  onClick={() => {
-    setMenuAbierto(false);
-    navigate("/usuario/configuracion");
-  }}
-  className="btn w-100 text-start border-0 rounded-0 px-3 py-3"
-  style={{
-    background: "white",
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.background =
-      "#f8f9fa";
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.background =
-      "white";
-  }}
->
-  <FaCog className="me-3" />
+                  <button
+                    type="button"
+                    onClick={
+                      irAConfiguracion
+                    }
+                    className="btn w-100 text-start border-0 rounded-0 px-3 py-3"
+                    style={{
+                      background: "white",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background =
+                        "#f8f9fa";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background =
+                        "white";
+                    }}
+                  >
 
-  Configuración
-</button>
+                    <FaCog className="me-3" />
 
-                  {/* CERRAR SESIÓN */}
+                    Configuración
+
+                  </button>
+
+                  {/* ==========================
+                      CERRAR SESIÓN
+                  ========================== */}
 
                   <div className="border-top">
+
                     <button
                       type="button"
                       onClick={
@@ -341,22 +464,33 @@ function UsuarioLayout({ children }) {
                       }
                       className="btn btn-danger w-100 text-start border-0 rounded-0 px-3 py-3"
                     >
+
                       <FaSignOutAlt className="me-3" />
 
                       Cerrar sesión
+
                     </button>
+
                   </div>
+
                 </div>
+
               )}
+
             </div>
+
           </div>
 
-          {/* CONTENIDO */}
+          {/* ==========================
+              CONTENIDO DE CADA PÁGINA
+          ========================== */}
 
-          <div className="p-4">
+          <div className="usuario-page-content">
             {children}
           </div>
+
         </main>
+
       </div>
 
       {/* ==========================
@@ -364,6 +498,7 @@ function UsuarioLayout({ children }) {
       ========================== */}
 
       {mostrarConfirmacion && (
+
         <div
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
           style={{
@@ -373,6 +508,7 @@ function UsuarioLayout({ children }) {
             padding: "20px",
           }}
         >
+
           <div
             className="bg-white shadow-lg rounded-4"
             style={{
@@ -381,7 +517,10 @@ function UsuarioLayout({ children }) {
               padding: "30px",
             }}
           >
-            {/* ICONO */}
+
+            {/* ==========================
+                ICONO
+            ========================== */}
 
             <div className="text-center mb-3">
 
@@ -391,21 +530,24 @@ function UsuarioLayout({ children }) {
                   width: "64px",
                   height: "64px",
                   borderRadius: "50%",
-                  background:
-                    "#fff3cd",
+                  background: "#fff3cd",
                 }}
               >
+
                 <FaExclamationTriangle
                   size={28}
                   style={{
                     color: "#f59e0b",
                   }}
                 />
+
               </div>
 
             </div>
 
-            {/* TITULO */}
+            {/* ==========================
+                TITULO
+            ========================== */}
 
             <h4 className="text-center fw-bold mb-2">
               ¿Cerrar sesión?
@@ -416,7 +558,9 @@ function UsuarioLayout({ children }) {
               cerrar tu sesión?
             </p>
 
-            {/* BOTONES */}
+            {/* ==========================
+                BOTONES
+            ========================== */}
 
             <div className="d-flex gap-2">
 
@@ -449,9 +593,12 @@ function UsuarioLayout({ children }) {
               </button>
 
             </div>
+
           </div>
+
         </div>
       )}
+
     </>
   );
 }

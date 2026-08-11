@@ -259,12 +259,16 @@ function Login() {
 
   return (
     <div
-      className="d-flex justify-content-center align-items-center vh-100"
-      style={{
-        background:
-          "linear-gradient(135deg, #0d6efd, #6f42c1)",
-      }}
-    >
+  className="d-flex justify-content-center align-items-center"
+  style={{
+    minHeight: "100vh",
+    background:
+      "linear-gradient(135deg, #0d6efd, #6f42c1)",
+    padding: "30px 15px",
+    boxSizing: "border-box",
+    overflowY: "auto",
+  }}
+>
       <div
         className="card shadow-lg border-0"
         style={{
@@ -490,7 +494,7 @@ function Login() {
             fontSize: "12px",
           }}
         >
-          © 2026 Turnify
+          © Solución Digital · 2026 · San Rafael, Mendoza, Argentina
         </p>
 
       </div>

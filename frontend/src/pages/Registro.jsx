@@ -517,7 +517,7 @@ function Registro() {
             fontSize: "12px",
           }}
         >
-          © 2026 Turnify
+          © Solución Digital · 2026 · San Rafael, Mendoza, Argentina
         </p>
 
       </div>
