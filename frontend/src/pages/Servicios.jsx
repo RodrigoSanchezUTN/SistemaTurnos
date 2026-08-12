@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
@@ -15,6 +15,13 @@ import {
 import DashboardLayout from "../layouts/DashboardLayout";
 import AppContext from "../context/AppContext";
 
+import {
+  obtenerServicios,
+  crearServicio,
+  actualizarServicio,
+  eliminarServicio,
+} from "../services/api";
+
 function Servicios() {
   const { servicios, setServicios } = useContext(AppContext);
 
@@ -25,6 +32,57 @@ function Servicios() {
 
   const [modoEdicion, setModoEdicion] = useState(false);
   const [idEditar, setIdEditar] = useState(null);
+  const [cargandoServicios, setCargandoServicios] = useState(true);
+
+  // =========================
+  // OBTENER TOKEN
+  // =========================
+
+  const obtenerToken = () => {
+    return (
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token")
+    );
+  };
+
+  // =========================
+  // CARGAR SERVICIOS
+  // =========================
+
+  useEffect(() => {
+    const cargarServicios = async () => {
+      try {
+        const token = obtenerToken();
+
+        if (!token) {
+          throw new Error("No hay sesión iniciada.");
+        }
+
+        const serviciosBackend =
+          await obtenerServicios(token);
+
+        setServicios(serviciosBackend);
+      } catch (error) {
+        console.error(
+          "Error al cargar servicios:",
+          error
+        );
+
+        toast.error(
+          error.message ||
+            "No se pudieron cargar los servicios."
+        );
+      } finally {
+        setCargandoServicios(false);
+      }
+    };
+
+    cargarServicios();
+  }, [setServicios]);
+
+  // =========================
+  // LIMPIAR FORMULARIO
+  // =========================
 
   const limpiarFormulario = () => {
     setNombre("");
@@ -34,35 +92,70 @@ function Servicios() {
     setIdEditar(null);
   };
 
-  const agregarServicio = () => {
+  // =========================
+  // AGREGAR SERVICIO
+  // =========================
+
+  const agregarServicio = async () => {
     if (!nombre.trim() || !duracion || !precio) {
       toast.error("Complete todos los campos");
       return;
     }
 
     if (Number(duracion) <= 0) {
-      toast.error("La duración debe ser mayor a 0");
+      toast.error(
+        "La duración debe ser mayor a 0"
+      );
       return;
     }
 
     if (Number(precio) <= 0) {
-      toast.error("El precio debe ser mayor a 0");
+      toast.error(
+        "El precio debe ser mayor a 0"
+      );
       return;
     }
 
-    const nuevoServicio = {
-      id: Date.now(),
-      nombre,
-      duracion,
-      precio,
-    };
+    try {
+      const token = obtenerToken();
 
-    setServicios([...servicios, nuevoServicio]);
+      if (!token) {
+        throw new Error("No hay sesión iniciada.");
+      }
 
-    toast.success("Servicio agregado correctamente");
+      const nuevoServicio =
+        await crearServicio(token, {
+          nombre: nombre.trim(),
+          duracion: Number(duracion),
+          precio: Number(precio),
+        });
 
-    limpiarFormulario();
+      setServicios([
+        ...servicios,
+        nuevoServicio,
+      ]);
+
+      toast.success(
+        "Servicio agregado correctamente"
+      );
+
+      limpiarFormulario();
+    } catch (error) {
+      console.error(
+        "Error al agregar servicio:",
+        error
+      );
+
+      toast.error(
+        error.message ||
+          "No se pudo agregar el servicio."
+      );
+    }
   };
+
+  // =========================
+  // EDITAR SERVICIO
+  // =========================
 
   const editarServicio = (servicio) => {
     setNombre(servicio.nombre);
@@ -73,42 +166,93 @@ function Servicios() {
     setIdEditar(servicio.id);
   };
 
-  const actualizarServicio = () => {
-    if (!nombre.trim() || !duracion || !precio) {
-      toast.error("Complete todos los campos");
-      return;
-    }
+  // =========================
+  // ACTUALIZAR SERVICIO
+  // =========================
 
-    if (Number(duracion) <= 0) {
-      toast.error("La duración debe ser mayor a 0");
-      return;
-    }
+  const actualizarServicioHandler =
+    async () => {
+      if (
+        !nombre.trim() ||
+        !duracion ||
+        !precio
+      ) {
+        toast.error(
+          "Complete todos los campos"
+        );
+        return;
+      }
 
-    if (Number(precio) <= 0) {
-      toast.error("El precio debe ser mayor a 0");
-      return;
-    }
+      if (Number(duracion) <= 0) {
+        toast.error(
+          "La duración debe ser mayor a 0"
+        );
+        return;
+      }
 
-    const serviciosActualizados = servicios.map(
-      (servicio) =>
-        servicio.id === idEditar
-          ? {
-              ...servicio,
-              nombre,
-              duracion,
-              precio,
+      if (Number(precio) <= 0) {
+        toast.error(
+          "El precio debe ser mayor a 0"
+        );
+        return;
+      }
+
+      try {
+        const token = obtenerToken();
+
+        if (!token) {
+          throw new Error(
+            "No hay sesión iniciada."
+          );
+        }
+
+        const servicioActualizado =
+          await actualizarServicio(
+            token,
+            idEditar,
+            {
+              nombre: nombre.trim(),
+              duracion: Number(duracion),
+              precio: Number(precio),
             }
-          : servicio
-    );
+          );
 
-    setServicios(serviciosActualizados);
+        const serviciosActualizados =
+          servicios.map((servicio) =>
+            servicio.id === idEditar
+              ? servicioActualizado
+              : servicio
+          );
 
-    toast.info("Servicio actualizado correctamente");
+        setServicios(
+          serviciosActualizados
+        );
 
-    limpiarFormulario();
-  };
+        toast.info(
+          "Servicio actualizado correctamente"
+        );
 
-  const eliminarServicio = (id) => {
+        limpiarFormulario();
+      } catch (error) {
+        console.error(
+          "Error al actualizar servicio:",
+          error
+        );
+
+        toast.error(
+          error.message ||
+            "No se pudo actualizar el servicio."
+        );
+      }
+    };
+
+  // =========================
+  // ELIMINAR SERVICIO
+  // =========================
+
+  const eliminarServicioHandler = (
+    id
+  ) => {
     Swal.fire({
       title: "¿Eliminar servicio?",
       text: "Esta acción no se puede deshacer.",
@@ -118,24 +262,57 @@ function Servicios() {
       cancelButtonColor: "#6c757d",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
+    }).then(async (result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      try {
+        const token = obtenerToken();
+
+        if (!token) {
+          throw new Error(
+            "No hay sesión iniciada."
+          );
+        }
+
+        await eliminarServicio(
+          token,
+          id
+        );
+
         setServicios(
           servicios.filter(
-            (servicio) => servicio.id !== id
+            (servicio) =>
+              servicio.id !== id
           )
         );
 
         toast.success(
           "Servicio eliminado correctamente"
         );
+      } catch (error) {
+        console.error(
+          "Error al eliminar servicio:",
+          error
+        );
+
+        toast.error(
+          error.message ||
+            "No se pudo eliminar el servicio."
+        );
       }
     });
   };
 
-  const serviciosFiltrados = servicios.filter(
-    (servicio) => {
-      const texto = busqueda.toLowerCase();
+  // =========================
+  // BÚSQUEDA
+  // =========================
+
+  const serviciosFiltrados =
+    servicios.filter((servicio) => {
+      const texto =
+        busqueda.toLowerCase();
 
       return (
         servicio.nombre
@@ -148,13 +325,14 @@ function Servicios() {
           .toString()
           .includes(texto)
       );
-    }
-  );
+    });
+
+  // =========================
+  // INTERFAZ
+  // =========================
 
   return (
     <DashboardLayout>
-
-      {/* TÍTULO */}
 
       <h2 className="mb-4 d-flex align-items-center">
         <FaSpa className="me-2" />
@@ -229,53 +407,40 @@ function Servicios() {
 
         <div className="mt-4">
 
-          {/* AGREGAR */}
+          {!modoEdicion && (
+            <button
+              type="button"
+              className="btn btn-success"
+              onClick={agregarServicio}
+            >
+              <FaPlus className="me-2" />
+              Agregar Servicio
+            </button>
+          )}
 
-          <button
-            type="button"
-            className="btn btn-success"
-            onClick={agregarServicio}
-            style={{
-              display: modoEdicion
-                ? "none"
-                : "inline-block",
-            }}
-          >
-            <FaPlus className="me-2" />
-            Agregar Servicio
-          </button>
+          {modoEdicion && (
+            <>
+              <button
+                type="button"
+                className="btn btn-warning me-2"
+                onClick={
+                  actualizarServicioHandler
+                }
+              >
+                <FaSave className="me-2" />
+                Actualizar
+              </button>
 
-          {/* ACTUALIZAR */}
-
-          <button
-            type="button"
-            className="btn btn-warning me-2"
-            onClick={actualizarServicio}
-            style={{
-              display: modoEdicion
-                ? "inline-block"
-                : "none",
-            }}
-          >
-            <FaSave className="me-2" />
-            Actualizar
-          </button>
-
-          {/* CANCELAR */}
-
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={limpiarFormulario}
-            style={{
-              display: modoEdicion
-                ? "inline-block"
-                : "none",
-            }}
-          >
-            <FaTimes className="me-2" />
-            Cancelar
-          </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={limpiarFormulario}
+              >
+                <FaTimes className="me-2" />
+                Cancelar
+              </button>
+            </>
+          )}
 
         </div>
 
@@ -290,7 +455,8 @@ function Servicios() {
             position: "absolute",
             left: "14px",
             top: "50%",
-            transform: "translateY(-50%)",
+            transform:
+              "translateY(-50%)",
             color: "#6c757d",
             zIndex: 1,
           }}
@@ -331,12 +497,25 @@ function Servicios() {
 
           <tbody>
 
-            {serviciosFiltrados.length > 0 ? (
+            {cargandoServicios ? (
+
+              <tr>
+                <td
+                  colSpan="5"
+                  className="text-center py-4"
+                >
+                  Cargando servicios...
+                </td>
+              </tr>
+
+            ) : serviciosFiltrados.length > 0 ? (
 
               serviciosFiltrados.map(
                 (servicio) => (
 
-                  <tr key={servicio.id}>
+                  <tr
+                    key={servicio.id}
+                  >
 
                     <td>
                       {servicio.id}
@@ -363,7 +542,9 @@ function Servicios() {
                         type="button"
                         className="btn btn-warning btn-sm me-2"
                         onClick={() =>
-                          editarServicio(servicio)
+                          editarServicio(
+                            servicio
+                          )
                         }
                       >
                         <FaEdit className="me-1" />
@@ -374,7 +555,7 @@ function Servicios() {
                         type="button"
                         className="btn btn-danger btn-sm"
                         onClick={() =>
-                          eliminarServicio(
+                          eliminarServicioHandler(
                             servicio.id
                           )
                         }
