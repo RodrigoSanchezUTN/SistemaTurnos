@@ -1,8 +1,7 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { login } from "../services/api";
 import {
-  signInWithEmailAndPassword,
   setPersistence,
   browserLocalPersistence,
   browserSessionPersistence,
@@ -39,182 +38,76 @@ function Login() {
 
   const iniciarSesionUsuario = async () => {
     if (!email.trim() || !password) {
-      alert("Completá todos los campos.");
-      return;
+        alert("Completá todos los campos.");
+        return;
     }
 
     try {
-      setCargando(true);
+        setCargando(true);
 
-      const emailIngresado =
-        email.trim().toLowerCase();
+        const emailIngresado = email.trim().toLowerCase();
 
-      // =========================
-      // ADMINISTRADOR
-      // =========================
-
-      if (
-        emailIngresado ===
-          "admin@turnify.com" &&
-        password === "123456"
-      ) {
-        iniciarSesion({
-          nombre: "Administrador",
-          email: emailIngresado,
-          telefono: "",
-          rol: "admin",
-        });
-
-        navigate("/dashboard");
-        return;
-      }
-
-      // =========================
-      // PERSISTENCIA FIREBASE
-      // =========================
-
-      await setPersistence(
-        auth,
-        recordarme
-          ? browserLocalPersistence
-          : browserSessionPersistence
-      );
-
-      // =========================
-      // FIREBASE
-      // =========================
-
-      const resultado =
-        await signInWithEmailAndPassword(
-          auth,
-          emailIngresado,
-          password
+        const resultado = await login(
+            emailIngresado,
+            password
         );
 
-      const usuarioFirebase =
-        resultado.user;
+        const usuarioBackend = resultado.usuario;
 
-      // =========================
-      // VERIFICACIÓN DE CORREO
-      // =========================
+        // Convertir los roles del backend
+        // al formato que utiliza actualmente el frontend
+        const rolFrontend =
+            usuarioBackend.rol === "Administrador"
+                ? "admin"
+                : "usuario";
 
-      if (!usuarioFirebase.emailVerified) {
-        iniciarSesion({
-          nombre:
-            usuarioFirebase.displayName ||
-            "Usuario",
+        const datosUsuario = {
+            id: usuarioBackend.id,
+            nombre: usuarioBackend.nombre,
+            email: usuarioBackend.email,
+            telefono: "",
+            foto: "",
+            rol: rolFrontend,
+            proveedor: "backend",
+        };
 
-          email:
-            usuarioFirebase.email ||
-            emailIngresado,
+        // Guardar el JWT
+        if (recordarme) {
+            localStorage.setItem(
+                "token",
+                resultado.token
+            );
+        } else {
+            sessionStorage.setItem(
+                "token",
+                resultado.token
+            );
+        }
 
-          telefono:
-            usuarioFirebase.phoneNumber ||
-            "",
+        iniciarSesion(datosUsuario);
 
-          foto:
-            usuarioFirebase.photoURL ||
-            "",
-
-          rol: "usuario",
-
-          proveedor: "email",
-        });
-
-        navigate("/verificar-correo", {
-          replace: true,
-
-          state: {
-            email:
-              usuarioFirebase.email ||
-              emailIngresado,
-          },
-        });
-
-        return;
-      }
-
-      // =========================
-      // DATOS DEL USUARIO
-      // =========================
-
-      const datosUsuario = {
-        nombre:
-          usuarioFirebase.displayName ||
-          "Usuario",
-
-        email:
-          usuarioFirebase.email ||
-          emailIngresado,
-
-        telefono:
-          usuarioFirebase.phoneNumber ||
-          "",
-
-        foto:
-          usuarioFirebase.photoURL ||
-          "",
-
-        rol: "usuario",
-
-        proveedor: "email",
-      };
-
-      iniciarSesion(
-        datosUsuario
-      );
-
-      navigate("/usuario");
+        // Redirigir según el rol
+        if (rolFrontend === "admin") {
+            navigate("/dashboard");
+        } else {
+            navigate("/usuario");
+        }
 
     } catch (error) {
-      console.error(
-        "Error al iniciar sesión:",
-        error
-      );
+        console.error(
+            "Error al iniciar sesión:",
+            error
+        );
 
-      // =========================
-      // ERRORES FIREBASE
-      // =========================
-
-      if (
-        error.code ===
-        "auth/invalid-credential"
-      ) {
         alert(
-          "Correo o contraseña incorrectos."
+            error.message ||
+            "No se pudo iniciar sesión. Intentá nuevamente."
         );
-      } else if (
-        error.code ===
-        "auth/user-not-found"
-      ) {
-        alert(
-          "No existe una cuenta con ese correo."
-        );
-      } else if (
-        error.code ===
-        "auth/wrong-password"
-      ) {
-        alert(
-          "La contraseña es incorrecta."
-        );
-      } else if (
-        error.code ===
-        "auth/invalid-email"
-      ) {
-        alert(
-          "El correo electrónico no es válido."
-        );
-      } else {
-        alert(
-          "No se pudo iniciar sesión. Intentá nuevamente."
-        );
-      }
 
     } finally {
-      setCargando(false);
+        setCargando(false);
     }
-  };
-
+};
   // =========================
   // GOOGLE
   // =========================

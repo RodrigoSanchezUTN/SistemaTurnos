@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 
 const clientesRoutes = require("./routes/clientes");
 const serviciosRoutes = require("./routes/servicios");
@@ -9,6 +10,7 @@ const authRoutes = require("./routes/auth");
 const errorMiddleware = require("./middleware/errorMiddleware");
 
 const app = express();
+app.use(cors());
 
 app.use(express.json());
 
