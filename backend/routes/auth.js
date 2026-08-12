@@ -5,9 +5,28 @@ const {
     loginUsuario
 } = require("../controllers/authController");
 
+const verificarToken = require("../middleware/authMiddleware");
+const verificarRol = require("../middleware/roleMiddleware");
+
 const router = express.Router();
 
-router.post("/registro", registrarUsuario);
-router.post("/login", loginUsuario);
+
+// Login
+// Público: no necesita token
+router.post(
+    "/login",
+    loginUsuario
+);
+
+
+// Registro
+// Solo Administradores pueden crear usuarios
+router.post(
+    "/registro",
+    verificarToken,
+    verificarRol("Administrador"),
+    registrarUsuario
+);
+
 
 module.exports = router;

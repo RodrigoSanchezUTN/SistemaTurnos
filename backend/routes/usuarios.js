@@ -6,11 +6,29 @@ const {
 } = require("../controllers/usuariosController");
 
 const verificarToken = require("../middleware/authMiddleware");
+const verificarRol = require("../middleware/roleMiddleware");
 
 const router = express.Router();
 
-router.get("/", verificarToken, obtenerUsuarios);
 
-router.post("/", verificarToken, crearUsuario);
+// Ver usuarios
+// Solo Administradores
+router.get(
+    "/",
+    verificarToken,
+    verificarRol("Administrador"),
+    obtenerUsuarios
+);
+
+
+// Crear usuarios
+// Solo Administradores
+router.post(
+    "/",
+    verificarToken,
+    verificarRol("Administrador"),
+    crearUsuario
+);
+
 
 module.exports = router;
