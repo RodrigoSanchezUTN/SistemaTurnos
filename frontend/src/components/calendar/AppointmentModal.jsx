@@ -1,9 +1,15 @@
-import { useState, useContext } from "react";
+import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
 import AppContext from "../../context/AppContext";
 import AppointmentForm from "./AppointmentForm";
+
+import {
+  crearTurno,
+  actualizarTurno,
+  eliminarTurno,
+} from "../../services/api";
 
 function AppointmentModal({
   show,
@@ -11,34 +17,116 @@ function AppointmentModal({
   modo = "crear",
   turno = null,
 }) {
-  const [cliente, setCliente] = useState(
-    turno?.cliente || ""
-  );
+  const { turnos, setTurnos } =
+    useContext(AppContext);
 
-  const [servicio, setServicio] = useState(
-    turno?.servicio || ""
-  );
+  // ==========================
+  // DATOS INICIALES
+  // ==========================
 
-  const [fecha, setFecha] = useState(
-    turno?.fecha || ""
-  );
+  const obtenerDatosIniciales = () => {
+    if (!turno) {
+      return {
+        cliente: "",
+        servicio: "",
+        fecha: "",
+        hora: "",
+        observaciones: "",
+      };
+    }
 
-  const [hora, setHora] = useState(
-    turno?.hora || ""
-  );
+    const fechaTurno =
+      new Date(turno.fecha);
+
+    return {
+      cliente: String(
+        turno.clienteId ||
+          turno.cliente?.id ||
+          ""
+      ),
+
+      servicio: String(
+        turno.servicioId ||
+          turno.servicio?.id ||
+          ""
+      ),
+
+      fecha:
+        fechaTurno.toLocaleDateString(
+          "en-CA"
+        ),
+
+      hora:
+        fechaTurno
+          .toTimeString()
+          .slice(0, 5),
+
+      observaciones:
+        turno.observaciones || "",
+    };
+  };
+
+  const datosIniciales =
+    obtenerDatosIniciales();
+
+  // ==========================
+  // ESTADOS
+  // ==========================
+
+  const [cliente, setCliente] =
+    useState(datosIniciales.cliente);
+
+  const [servicio, setServicio] =
+    useState(datosIniciales.servicio);
+
+  const [fecha, setFecha] =
+    useState(datosIniciales.fecha);
+
+  const [hora, setHora] =
+    useState(datosIniciales.hora);
 
   const [observaciones, setObservaciones] =
     useState(
-      turno?.observaciones || ""
+      datosIniciales.observaciones
     );
 
-  const {
-    turnos,
-    setTurnos,
-  } = useContext(AppContext);
+  // ==========================
+  // TOKEN
+  // ==========================
+
+  const obtenerToken = () => {
+    return (
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token")
+    );
+  };
 
   // ==========================
-  // LIMPIAR FORMULARIO
+  // USUARIO
+  // ==========================
+
+  const obtenerUsuario = () => {
+    const usuarioGuardado =
+      localStorage.getItem("usuario");
+
+    if (!usuarioGuardado) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(usuarioGuardado);
+    } catch (error) {
+      console.error(
+        "Error al obtener usuario:",
+        error
+      );
+
+      return null;
+    }
+  };
+
+  // ==========================
+  // LIMPIAR
   // ==========================
 
   const limpiarFormulario = () => {
@@ -53,7 +141,7 @@ function AppointmentModal({
   // GUARDAR TURNO
   // ==========================
 
-  const guardarTurno = () => {
+  const guardarTurno = async () => {
     if (
       !cliente ||
       !servicio ||
@@ -61,95 +149,109 @@ function AppointmentModal({
       !hora
     ) {
       toast.error(
-        "Completa todos los campos."
+        "Completá todos los campos."
       );
 
       return;
     }
 
-    // Comprobar horario ocupado
-    const horarioOcupado =
-      turnos.some(
-        (turnoExistente) =>
-          turnoExistente.fecha === fecha &&
-          turnoExistente.hora === hora &&
-          turnoExistente.id !== turno?.id &&
-          turnoExistente.estado !==
-            "Cancelado"
-      );
+    try {
+      const token = obtenerToken();
 
-    if (horarioOcupado) {
-      toast.error(
-        "Ese horario ya está ocupado."
-      );
-
-      return;
-    }
-
-    const datosTurno = {
-      cliente,
-      servicio,
-      fecha,
-      hora,
-      estado:
-        turno?.estado || "Pendiente",
-      observaciones,
-    };
-
-    // ==========================
-    // EDITAR
-    // ==========================
-
-    if (
-      modo === "editar" &&
-      turno
-    ) {
-      const turnosActualizados =
-        turnos.map(
-          (turnoActual) =>
-            turnoActual.id === turno.id
-              ? {
-                  ...turnoActual,
-                  ...datosTurno,
-                }
-              : turnoActual
+      if (!token) {
+        throw new Error(
+          "No hay sesión iniciada."
         );
+      }
 
-      setTurnos(
-        turnosActualizados
-      );
+      const usuario =
+        obtenerUsuario();
 
-      toast.success(
-        "Turno actualizado correctamente."
-      );
-    }
+      if (!usuario?.id) {
+        throw new Error(
+          "No se encontró el usuario de la sesión."
+        );
+      }
 
-    // ==========================
-    // CREAR
-    // ==========================
-
-    else {
-      const nuevoTurno = {
-        id: Date.now(),
-        ...datosTurno,
+      const datosTurno = {
+        fecha: `${fecha}T${hora}:00`,
+        estado:
+          turno?.estado ||
+          "Pendiente",
+        clienteId: Number(cliente),
+        servicioId: Number(servicio),
+        usuarioId: Number(usuario.id),
       };
 
-      setTurnos([
-        ...turnos,
-        nuevoTurno,
-      ]);
+      // ==========================
+      // EDITAR
+      // ==========================
 
-      toast.success(
-        "Turno creado correctamente."
+      if (
+        modo === "editar" &&
+        turno
+      ) {
+        const turnoActualizado =
+          await actualizarTurno(
+            token,
+            turno.id,
+            datosTurno
+          );
+
+        setTurnos(
+          turnos.map(
+            (turnoActual) =>
+              turnoActual.id ===
+              turno.id
+                ? turnoActualizado
+                : turnoActual
+          )
+        );
+
+        toast.success(
+          "Turno actualizado correctamente."
+        );
+      }
+
+      // ==========================
+      // CREAR
+      // ==========================
+
+      else {
+        const nuevoTurno =
+          await crearTurno(
+            token,
+            datosTurno
+          );
+
+        setTurnos([
+          ...turnos,
+          nuevoTurno,
+        ]);
+
+        toast.success(
+          "Turno creado correctamente."
+        );
+      }
+
+      limpiarFormulario();
+      onClose();
+
+    } catch (error) {
+      console.error(
+        "Error al guardar turno:",
+        error
+      );
+
+      toast.error(
+        error.message ||
+          "No se pudo guardar el turno."
       );
     }
-
-    limpiarFormulario();
-    onClose();
   };
 
   // ==========================
-  // ELIMINAR TURNO
+  // ELIMINAR
   // ==========================
 
   const confirmarEliminar =
@@ -158,73 +260,68 @@ function AppointmentModal({
         return;
       }
 
-      // Cerramos primero el editor
-      onClose();
-
-      // Esperamos a que React termine
-      // de desmontar el modal
-      await new Promise(
-        (resolve) =>
-          setTimeout(resolve, 0)
-      );
-
-      // ==========================
-      // CONFIRMACIÓN
-      // ==========================
-
       const resultado =
         await Swal.fire({
           title: "¿Eliminar turno?",
           text: "Esta acción no se puede deshacer.",
           icon: "warning",
-
           showCancelButton: true,
-
           confirmButtonText:
             "Sí, eliminar",
-
           cancelButtonText:
             "Cancelar",
-
           confirmButtonColor:
             "#d33",
-
           cancelButtonColor:
             "#6c757d",
-
           reverseButtons: true,
-
           allowOutsideClick: false,
         });
-
-      // ==========================
-      // CANCELAR
-      // ==========================
 
       if (!resultado.isConfirmed) {
         return;
       }
 
-      // ==========================
-      // ELIMINAR
-      // ==========================
+      try {
+        const token = obtenerToken();
 
-      const turnosActualizados =
-        turnos.filter(
-          (turnoActual) =>
-            turnoActual.id !==
-            turno.id
+        if (!token) {
+          throw new Error(
+            "No hay sesión iniciada."
+          );
+        }
+
+        await eliminarTurno(
+          token,
+          turno.id
         );
 
-      setTurnos(
-        turnosActualizados
-      );
+        setTurnos(
+          turnos.filter(
+            (turnoActual) =>
+              turnoActual.id !==
+              turno.id
+          )
+        );
 
-      toast.success(
-        "Turno eliminado correctamente."
-      );
+        toast.success(
+          "Turno eliminado correctamente."
+        );
 
-      limpiarFormulario();
+        limpiarFormulario();
+        onClose();
+
+      } catch (error) {
+        console.error(
+          "Error al eliminar turno:",
+          error
+        );
+
+        toast.error(
+          error.message ||
+            "No se pudo eliminar el turno."
+        );
+      }
     };
 
   // ==========================
@@ -244,8 +341,6 @@ function AppointmentModal({
 
       <div className="appointment-modal">
 
-        {/* HEADER */}
-
         <div className="modal-header">
 
           <h3>
@@ -258,13 +353,12 @@ function AppointmentModal({
             type="button"
             className="btn-close"
             onClick={onClose}
+            aria-label="Cerrar"
           >
-            ✕
+            ×
           </button>
 
         </div>
-
-        {/* FORMULARIO */}
 
         <AppointmentForm
           cliente={cliente}
@@ -282,8 +376,6 @@ function AppointmentModal({
             setObservaciones
           }
         />
-
-        {/* FOOTER */}
 
         <div className="modal-footer">
 

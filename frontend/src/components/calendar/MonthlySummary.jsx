@@ -1,22 +1,38 @@
 import { FaChartBar } from "react-icons/fa";
 
 function MonthlySummary({ turnos }) {
-  const hoy = new Date().toISOString().split("T")[0];
+  const hoy = new Date();
+
+  const fechaHoy =
+    hoy.toLocaleDateString("en-CA");
 
   const turnosHoy = turnos.filter(
-    (t) => t.fecha === hoy
+    (turno) => {
+      if (!turno.fecha) {
+        return false;
+      }
+
+      const fechaTurno =
+        new Date(turno.fecha)
+          .toLocaleDateString("en-CA");
+
+      return fechaTurno === fechaHoy;
+    }
   ).length;
 
   const pendientes = turnos.filter(
-    (t) => t.estado === "Pendiente"
+    (turno) =>
+      turno.estado === "Pendiente"
   ).length;
 
   const confirmados = turnos.filter(
-    (t) => t.estado === "Confirmado"
+    (turno) =>
+      turno.estado === "Confirmado"
   ).length;
 
   const cancelados = turnos.filter(
-    (t) => t.estado === "Cancelado"
+    (turno) =>
+      turno.estado === "Cancelado"
   ).length;
 
   return (

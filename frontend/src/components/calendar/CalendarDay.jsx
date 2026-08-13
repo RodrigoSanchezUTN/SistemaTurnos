@@ -1,7 +1,5 @@
 import Swal from "sweetalert2";
 
-
-
 function CalendarDay({
   dia,
   mes,
@@ -9,18 +7,58 @@ function CalendarDay({
   turnos,
   onTurnoClick,
 }) {
-  
   if (!dia) {
-    return <div className="calendar-empty"></div>;
+    return (
+      <div className="calendar-empty"></div>
+    );
   }
 
-  const fecha = `${año}-${String(mes + 1).padStart(2, "0")}-${String(
-    dia
-  ).padStart(2, "0")}`;
+  const fecha =
+    `${año}-${String(mes + 1).padStart(2, "0")}-${String(
+      dia
+    ).padStart(2, "0")}`;
+
+  const obtenerFechaTurno = (turno) => {
+    if (!turno.fecha) {
+      return "";
+    }
+
+    return new Date(turno.fecha)
+      .toLocaleDateString("en-CA");
+  };
 
   const turnosDelDia = turnos.filter(
-    (turno) => turno.fecha === fecha
+    (turno) =>
+      obtenerFechaTurno(turno) === fecha
   );
+
+  const obtenerHora = (turno) => {
+    if (!turno.fecha) {
+      return "";
+    }
+
+    return new Date(turno.fecha)
+      .toTimeString()
+      .slice(0, 5);
+  };
+
+  const obtenerNombreCliente = (turno) => {
+    if (turno.cliente) {
+      return `${turno.cliente.nombre || ""} ${
+        turno.cliente.apellido || ""
+      }`.trim();
+    }
+
+    return "Cliente";
+  };
+
+  const obtenerNombreServicio = (turno) => {
+    if (turno.servicio?.nombre) {
+      return turno.servicio.nombre;
+    }
+
+    return "Servicio";
+  };
 
   const colorEstado = (estado) => {
     switch (estado) {
@@ -40,20 +78,35 @@ function CalendarDay({
 
   const abrirTurno = (turno) => {
     Swal.fire({
-      title: "📅 Información del turno",
+      title: "Información del turno",
 
       html: `
         <div style="text-align:left">
 
-          <p><b>👤 Cliente:</b> ${turno.cliente}</p>
+          <p>
+            <b>Cliente:</b>
+            ${obtenerNombreCliente(turno)}
+          </p>
 
-          <p><b>💆 Servicio:</b> ${turno.servicio}</p>
+          <p>
+            <b>Servicio:</b>
+            ${obtenerNombreServicio(turno)}
+          </p>
 
-          <p><b>📅 Fecha:</b> ${turno.fecha}</p>
+          <p>
+            <b>Fecha:</b>
+            ${obtenerFechaTurno(turno)}
+          </p>
 
-          <p><b>🕒 Hora:</b> ${turno.hora}</p>
+          <p>
+            <b>Hora:</b>
+            ${obtenerHora(turno)}
+          </p>
 
-          <p><b>📌 Estado:</b> ${turno.estado}</p>
+          <p>
+            <b>Estado:</b>
+            ${turno.estado || "Pendiente"}
+          </p>
 
         </div>
       `,
@@ -71,32 +124,34 @@ function CalendarDay({
 
       <div className="calendar-events">
 
-        {turnosDelDia.slice(0, 3).map((turno) => (
-          <div
-            key={turno.id}
-            className="calendar-event"
-            style={{
-              background: colorEstado(turno.estado),
-            }}
-            onClick={() => {
-
-  if (onTurnoClick) {
-    onTurnoClick(turno);
-  } else {
-    abrirTurno(turno);
-  }
-
-}}
-          >
-            {turno.hora} - {turno.cliente}
-          </div>
-        ))}
+        {turnosDelDia
+          .slice(0, 3)
+          .map((turno) => (
+            <div
+              key={turno.id}
+              className="calendar-event"
+              style={{
+                background:
+                  colorEstado(
+                    turno.estado
+                  ),
+              }}
+              onClick={() => {
+                if (onTurnoClick) {
+                  onTurnoClick(turno);
+                } else {
+                  abrirTurno(turno);
+                }
+              }}
+            >
+              {obtenerHora(turno)} -{" "}
+              {obtenerNombreCliente(turno)}
+            </div>
+          ))}
 
         {turnosDelDia.length > 3 && (
           <div className="calendar-more">
-
             +{turnosDelDia.length - 3} más
-
           </div>
         )}
 

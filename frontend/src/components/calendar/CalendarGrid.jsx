@@ -6,16 +6,26 @@ function CalendarGrid({
   turnos,
   onTurnoClick,
 }) {
-  const primerDia = new Date(añoActual, mesActual, 1);
+  const primerDia = new Date(
+    añoActual,
+    mesActual,
+    1
+  );
 
-  const ultimoDia = new Date(añoActual, mesActual + 1, 0);
+  const ultimoDia = new Date(
+    añoActual,
+    mesActual + 1,
+    0
+  );
 
   let inicio = primerDia.getDay();
 
   // Domingo pasa al final
-  inicio = inicio === 0 ? 6 : inicio - 1;
+  inicio =
+    inicio === 0 ? 6 : inicio - 1;
 
-  const diasDelMes = ultimoDia.getDate();
+  const diasDelMes =
+    ultimoDia.getDate();
 
   const celdas = [];
 
@@ -25,7 +35,11 @@ function CalendarGrid({
   }
 
   // Días del mes
-  for (let i = 1; i <= diasDelMes; i++) {
+  for (
+    let i = 1;
+    i <= diasDelMes;
+    i++
+  ) {
     celdas.push(i);
   }
 
@@ -35,14 +49,14 @@ function CalendarGrid({
   }
 
   const diasSemana = [
-  "Lun",
-  "Mar",
-  "Mié",
-  "Jue",
-  "Vie",
-  "Sáb",
-  "Dom",
-];
+    "Lun",
+    "Mar",
+    "Mié",
+    "Jue",
+    "Vie",
+    "Sáb",
+    "Dom",
+  ];
 
   return (
     <div className="calendar-grid">
@@ -58,13 +72,13 @@ function CalendarGrid({
 
       {celdas.map((dia, index) => (
         <CalendarDay
-  key={index}
-  dia={dia}
-  mes={mesActual}
-  año={añoActual}
-  turnos={turnos}
-  onTurnoClick={onTurnoClick}
-/>
+          key={index}
+          dia={dia}
+          mes={mesActual}
+          año={añoActual}
+          turnos={turnos}
+          onTurnoClick={onTurnoClick}
+        />
       ))}
 
     </div>
