@@ -86,6 +86,11 @@ function Login() {
 
         iniciarSesion(datosUsuario);
 
+localStorage.setItem(
+    "usuario",
+    JSON.stringify(datosUsuario)
+);
+
         // Redirigir según el rol
         if (rolFrontend === "admin") {
             navigate("/dashboard");

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
@@ -8,12 +8,18 @@ import {
   FaPlus,
   FaEdit,
   FaTrash,
-  FaSave,
   FaTimes,
 } from "react-icons/fa";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 import AppContext from "../context/AppContext";
+
+import {
+  obtenerTurnos,
+  crearTurno,
+  actualizarTurno,
+  eliminarTurno,
+} from "../services/api";
 
 function Turnos() {
   const {
@@ -23,41 +29,72 @@ function Turnos() {
     setTurnos,
   } = useContext(AppContext);
 
-  // ==========================
-  // FORMULARIO
-  // ==========================
-
-  const [cliente, setCliente] =
-    useState("");
-
-  const [servicio, setServicio] =
-    useState("");
-
-  const [fecha, setFecha] =
-    useState("");
-
-  const [hora, setHora] =
-    useState("");
-
+  const [cliente, setCliente] = useState("");
+  const [servicio, setServicio] = useState("");
+  const [fecha, setFecha] = useState("");
+  const [hora, setHora] = useState("");
   const [estado, setEstado] =
     useState("Pendiente");
 
-  // ==========================
-  // BÚSQUEDA
-  // ==========================
-
   const [busqueda, setBusqueda] =
     useState("");
-
-  // ==========================
-  // EDICIÓN
-  // ==========================
 
   const [modoEdicion, setModoEdicion] =
     useState(false);
 
   const [idEditar, setIdEditar] =
     useState(null);
+
+  const [cargandoTurnos, setCargandoTurnos] =
+    useState(true);
+
+  // ==========================
+  // TOKEN
+  // ==========================
+
+  const obtenerToken = () => {
+    return (
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token")
+    );
+  };
+
+  // ==========================
+  // CARGAR TURNOS
+  // ==========================
+
+  useEffect(() => {
+    const cargarTurnos = async () => {
+      try {
+        const token = obtenerToken();
+
+        if (!token) {
+          throw new Error(
+            "No hay sesión iniciada."
+          );
+        }
+
+        const turnosBackend =
+          await obtenerTurnos(token);
+
+        setTurnos(turnosBackend);
+      } catch (error) {
+        console.error(
+          "Error al cargar turnos:",
+          error
+        );
+
+        toast.error(
+          error.message ||
+            "No se pudieron cargar los turnos."
+        );
+      } finally {
+        setCargandoTurnos(false);
+      }
+    };
+
+    cargarTurnos();
+  }, [setTurnos]);
 
   // ==========================
   // LIMPIAR FORMULARIO
@@ -78,7 +115,7 @@ function Turnos() {
   // AGREGAR / ACTUALIZAR
   // ==========================
 
-  const agregarTurno = () => {
+  const guardarTurno = async () => {
     if (
       !cliente ||
       !servicio ||
@@ -88,71 +125,93 @@ function Turnos() {
       toast.error(
         "Complete todos los campos"
       );
-
       return;
     }
 
-    // Comprobar horario ocupado
-    const existe = turnos.some(
-      (turno) =>
-        turno.fecha === fecha &&
-        turno.hora === hora &&
-        (
-          !modoEdicion ||
-          turno.id !== idEditar
-        ) &&
-        turno.estado !== "Cancelado"
-    );
+    try {
+      const token = obtenerToken();
 
-    if (existe) {
-      toast.warning(
-        "Ese horario ya está ocupado"
-      );
+      if (!token) {
+        throw new Error(
+          "No hay sesión iniciada."
+        );
+      }
 
-      return;
-    }
+      const usuarioGuardado =
+        localStorage.getItem("usuario");
 
-    // ==========================
-    // ACTUALIZAR
-    // ==========================
+      if (!usuarioGuardado) {
+        throw new Error(
+          "No se encontró el usuario de la sesión."
+        );
+      }
 
-    if (modoEdicion) {
-      const turnosActualizados =
-        turnos.map((turno) =>
-          turno.id === idEditar
-            ? {
-                ...turno,
-                cliente,
-                servicio,
-                fecha,
-                hora,
-                estado,
-              }
-            : turno
+      const usuarioActual =
+        JSON.parse(usuarioGuardado);
+
+      if (!usuarioActual.id) {
+        throw new Error(
+          "El usuario de la sesión no tiene un ID válido."
+        );
+      }
+
+      /*
+       * El backend recibe la fecha como Date.
+       * Combinamos fecha + hora para enviar
+       * el momento exacto del turno.
+       */
+      const fechaCompleta =
+        `${fecha}T${hora}:00`;
+
+      const datosTurno = {
+        fecha: fechaCompleta,
+        estado,
+        clienteId: Number(cliente),
+        servicioId: Number(servicio),
+        usuarioId: Number(usuarioActual.id),
+      };
+
+      // ==========================
+      // ACTUALIZAR
+      // ==========================
+
+      if (modoEdicion) {
+        const turnoActualizado =
+          await actualizarTurno(
+            token,
+            idEditar,
+            datosTurno
+          );
+
+        const turnosActualizados =
+          turnos.map((turno) =>
+            turno.id === idEditar
+              ? turnoActualizado
+              : turno
+          );
+
+        setTurnos(
+          turnosActualizados
         );
 
-      setTurnos(
-        turnosActualizados
-      );
+        toast.info(
+          "Turno actualizado correctamente"
+        );
 
-      toast.info(
-        "Turno actualizado correctamente"
-      );
-    }
+        limpiarFormulario();
 
-    // ==========================
-    // CREAR
-    // ==========================
+        return;
+      }
 
-    else {
-      const nuevoTurno = {
-        id: Date.now(),
-        cliente,
-        servicio,
-        fecha,
-        hora,
-        estado,
-      };
+      // ==========================
+      // CREAR
+      // ==========================
+
+      const nuevoTurno =
+        await crearTurno(
+          token,
+          datosTurno
+        );
 
       setTurnos([
         ...turnos,
@@ -162,9 +221,20 @@ function Turnos() {
       toast.success(
         "Turno agregado correctamente"
       );
-    }
 
-    limpiarFormulario();
+      limpiarFormulario();
+
+    } catch (error) {
+      console.error(
+        "Error al guardar turno:",
+        error
+      );
+
+      toast.error(
+        error.message ||
+          "No se pudo guardar el turno."
+      );
+    }
   };
 
   // ==========================
@@ -172,31 +242,48 @@ function Turnos() {
   // ==========================
 
   const editarTurno = (turno) => {
+    const fechaTurno =
+      new Date(turno.fecha);
+
+    /*
+     * Recuperamos la fecha y hora
+     * para completar el formulario.
+     */
+
+    const fechaLocal =
+      fechaTurno.toLocaleDateString(
+        "en-CA"
+      );
+
+    const horaLocal =
+      fechaTurno.toTimeString()
+        .slice(0, 5);
+
     setCliente(
-      turno.cliente || ""
+      String(
+        turno.clienteId ||
+          turno.cliente?.id ||
+          ""
+      )
     );
 
     setServicio(
-      turno.servicio || ""
+      String(
+        turno.servicioId ||
+          turno.servicio?.id ||
+          ""
+      )
     );
 
-    setFecha(
-      turno.fecha || ""
-    );
-
-    setHora(
-      turno.hora || ""
-    );
-
+    setFecha(fechaLocal);
+    setHora(horaLocal);
     setEstado(
       turno.estado || "Pendiente"
     );
 
     setIdEditar(turno.id);
-
     setModoEdicion(true);
 
-    // Llevar el formulario hacia arriba
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -207,7 +294,9 @@ function Turnos() {
   // ELIMINAR
   // ==========================
 
-  const eliminarTurno = (id) => {
+  const eliminarTurnoHandler = (
+    id
+  ) => {
     Swal.fire({
       title: "¿Eliminar turno?",
       text: "Esta acción no se puede deshacer.",
@@ -215,31 +304,53 @@ function Turnos() {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6c757d",
-      confirmButtonText:
-        "Sí, eliminar",
-      cancelButtonText:
-        "Cancelar",
-    }).then((result) => {
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then(async (result) => {
       if (!result.isConfirmed) {
         return;
       }
 
-      setTurnos(
-        turnos.filter(
-          (turno) =>
-            turno.id !== id
-        )
-      );
+      try {
+        const token = obtenerToken();
 
-      // Si justo estábamos editando
-      // ese turno, limpiamos.
-      if (idEditar === id) {
-        limpiarFormulario();
+        if (!token) {
+          throw new Error(
+            "No hay sesión iniciada."
+          );
+        }
+
+        await eliminarTurno(
+          token,
+          id
+        );
+
+        setTurnos(
+          turnos.filter(
+            (turno) =>
+              turno.id !== id
+          )
+        );
+
+        if (idEditar === id) {
+          limpiarFormulario();
+        }
+
+        toast.success(
+          "Turno eliminado correctamente"
+        );
+
+      } catch (error) {
+        console.error(
+          "Error al eliminar turno:",
+          error
+        );
+
+        toast.error(
+          error.message ||
+            "No se pudo eliminar el turno."
+        );
       }
-
-      toast.success(
-        "Turno eliminado correctamente"
-      );
     });
   };
 
@@ -254,12 +365,22 @@ function Turnos() {
     turnos.filter((turno) => {
       const clienteTexto =
         String(
-          turno.cliente || ""
+          turno.cliente?.nombre ||
+            turno.cliente ||
+            ""
+        ).toLowerCase();
+
+      const apellidoTexto =
+        String(
+          turno.cliente?.apellido ||
+            ""
         ).toLowerCase();
 
       const servicioTexto =
         String(
-          turno.servicio || ""
+          turno.servicio?.nombre ||
+            turno.servicio ||
+            ""
         ).toLowerCase();
 
       const fechaTexto =
@@ -268,9 +389,11 @@ function Turnos() {
         ).toLowerCase();
 
       const horaTexto =
-        String(
-          turno.hora || ""
-        ).toLowerCase();
+        turno.fecha
+          ? new Date(turno.fecha)
+              .toTimeString()
+              .slice(0, 5)
+          : "";
 
       const estadoTexto =
         String(
@@ -279,6 +402,9 @@ function Turnos() {
 
       return (
         clienteTexto.includes(
+          textoBusqueda
+        ) ||
+        apellidoTexto.includes(
           textoBusqueda
         ) ||
         servicioTexto.includes(
@@ -303,16 +429,9 @@ function Turnos() {
   return (
     <DashboardLayout>
 
-      {/* ==========================
-          TÍTULO
-      ========================== */}
-
       <h2 className="mb-4 d-flex align-items-center">
-
         <FaCalendarAlt className="me-2" />
-
         Gestión de Turnos
-
       </h2>
 
       {/* ==========================
@@ -322,11 +441,9 @@ function Turnos() {
       <div className="card shadow p-4 mb-4">
 
         <h4 className="mb-3">
-
           {modoEdicion
             ? "Editar Turno"
             : "Nuevo Turno"}
-
         </h4>
 
         <div className="row g-3">
@@ -355,18 +472,17 @@ function Turnos() {
 
               {clientes.map(
                 (clienteActual) => (
+
                   <option
-                    key={
+                    key={clienteActual.id}
+                    value={
                       clienteActual.id
                     }
-                    value={
-                      clienteActual.nombre
-                    }
                   >
-                    {
-                      clienteActual.nombre
-                    }
+                    {clienteActual.nombre}{" "}
+                    {clienteActual.apellido}
                   </option>
+
                 )
               )}
 
@@ -398,18 +514,16 @@ function Turnos() {
 
               {servicios.map(
                 (servicioActual) => (
+
                   <option
-                    key={
+                    key={servicioActual.id}
+                    value={
                       servicioActual.id
                     }
-                    value={
-                      servicioActual.nombre
-                    }
                   >
-                    {
-                      servicioActual.nombre
-                    }
+                    {servicioActual.nombre}
                   </option>
+
                 )
               )}
 
@@ -489,6 +603,10 @@ function Turnos() {
                 Cancelado
               </option>
 
+              <option value="Finalizado">
+                Finalizado
+              </option>
+
             </select>
 
           </div>
@@ -497,56 +615,44 @@ function Turnos() {
 
           <div className="col-md-8 d-flex align-items-end">
 
-            {/* CONTENEDOR ESTABLE */}
-
             <div className="d-flex gap-2">
 
-              {modoEdicion && (
-                <button
-                  type="button"
-                  className="btn btn-warning"
-                  onClick={
-                    agregarTurno
-                  }
-                >
+              {modoEdicion ? (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-warning"
+                    onClick={
+                      guardarTurno
+                    }
+                  >
+                    Actualizar
+                  </button>
 
-                  <FaSave className="me-2" />
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={
+                      limpiarFormulario
+                    }
+                  >
+                    <FaTimes className="me-2" />
+                    Cancelar
+                  </button>
+                </>
+              ) : (
 
-                  Actualizar
-
-                </button>
-              )}
-
-              {modoEdicion && (
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={
-                    limpiarFormulario
-                  }
-                >
-
-                  <FaTimes className="me-2" />
-
-                  Cancelar
-
-                </button>
-              )}
-
-              {!modoEdicion && (
                 <button
                   type="button"
                   className="btn btn-success"
                   onClick={
-                    agregarTurno
+                    guardarTurno
                   }
                 >
-
                   <FaPlus className="me-2" />
-
                   Agregar Turno
-
                 </button>
+
               )}
 
             </div>
@@ -571,6 +677,7 @@ function Turnos() {
             transform:
               "translateY(-50%)",
             color: "#6c757d",
+            zIndex: 1,
           }}
         />
 
@@ -633,14 +740,27 @@ function Turnos() {
 
           <tbody>
 
-            {turnosFiltrados.length ===
-            0 ? (
+            {cargandoTurnos ? (
 
               <tr>
 
                 <td
                   colSpan="6"
-                  className="text-center"
+                  className="text-center py-4"
+                >
+                  Cargando turnos...
+                </td>
+
+              </tr>
+
+            ) : turnosFiltrados.length ===
+              0 ? (
+
+              <tr>
+
+                <td
+                  colSpan="6"
+                  className="text-center py-4"
                 >
                   No hay turnos
                   registrados.
@@ -651,99 +771,113 @@ function Turnos() {
             ) : (
 
               turnosFiltrados.map(
-                (turno) => (
+                (turno) => {
 
-                  <tr
-                    key={turno.id}
-                  >
+                  const fechaTurno =
+                    new Date(
+                      turno.fecha
+                    );
 
-                    <td>
-                      {
-                        turno.cliente
-                      }
-                    </td>
+                  const fechaTexto =
+                    fechaTurno.toLocaleDateString(
+                      "es-AR"
+                    );
 
-                    <td>
-                      {
-                        turno.servicio
-                      }
-                    </td>
+                  const horaTexto =
+                    fechaTurno
+                      .toTimeString()
+                      .slice(0, 5);
 
-                    <td>
-                      {
-                        turno.fecha
-                      }
-                    </td>
+                  const nombreCliente =
+                    turno.cliente
+                      ? `${turno.cliente.nombre} ${turno.cliente.apellido || ""}`.trim()
+                      : "Sin cliente";
 
-                    <td>
-                      {
-                        turno.hora
-                      }
-                    </td>
+                  const nombreServicio =
+                    turno.servicio?.nombre ||
+                    "Sin servicio";
 
-                    <td>
+                  return (
 
-                      <span
-                        className={`badge ${
-                          turno.estado ===
-                          "Confirmado"
-                            ? "bg-success"
-                            : turno.estado ===
-                              "Cancelado"
-                            ? "bg-danger"
-                            : "bg-warning text-dark"
-                        }`}
-                      >
-                        {
-                          turno.estado
-                        }
-                      </span>
+                    <tr
+                      key={turno.id}
+                    >
 
-                    </td>
+                      <td>
+                        {nombreCliente}
+                      </td>
 
-                    <td>
+                      <td>
+                        {nombreServicio}
+                      </td>
 
-                      <div className="d-flex gap-2">
+                      <td>
+                        {fechaTexto}
+                      </td>
 
-                        <button
-                          type="button"
-                          className="btn btn-warning btn-sm"
-                          onClick={() =>
-                            editarTurno(
-                              turno
-                            )
-                          }
+                      <td>
+                        {horaTexto}
+                      </td>
+
+                      <td>
+
+                        <span
+                          className={`badge ${
+                            turno.estado ===
+                            "Confirmado"
+                              ? "bg-success"
+                              : turno.estado ===
+                                "Cancelado"
+                              ? "bg-danger"
+                              : turno.estado ===
+                                "Finalizado"
+                              ? "bg-primary"
+                              : "bg-warning text-dark"
+                          }`}
                         >
+                          {turno.estado}
+                        </span>
 
-                          <FaEdit className="me-1" />
+                      </td>
 
-                          Editar
+                      <td>
 
-                        </button>
+                        <div className="d-flex gap-2">
 
-                        <button
-                          type="button"
-                          className="btn btn-danger btn-sm"
-                          onClick={() =>
-                            eliminarTurno(
-                              turno.id
-                            )
-                          }
-                        >
+                          <button
+                            type="button"
+                            className="btn btn-warning btn-sm"
+                            onClick={() =>
+                              editarTurno(
+                                turno
+                              )
+                            }
+                          >
+                            <FaEdit className="me-1" />
+                            Editar
+                          </button>
 
-                          <FaTrash className="me-1" />
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            onClick={() =>
+                              eliminarTurnoHandler(
+                                turno.id
+                              )
+                            }
+                          >
+                            <FaTrash className="me-1" />
+                            Eliminar
+                          </button>
 
-                          Eliminar
+                        </div>
 
-                        </button>
+                      </td>
 
-                      </div>
+                    </tr>
 
-                    </td>
-
-                  </tr>
-
-                )
+                  );
+                }
               )
 
             )}

@@ -185,3 +185,128 @@ export async function eliminarCliente(
 
     return data;
 }
+
+export async function obtenerTurnos(token) {
+    const response = await fetch(`${API_URL}/turnos`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.mensaje || "Error al obtener turnos"
+        );
+    }
+
+    return data;
+}
+
+export async function crearTurno(token, turno) {
+    const response = await fetch(`${API_URL}/turnos`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(turno),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.mensaje || "Error al crear turno"
+        );
+    }
+
+    return data;
+}
+
+export async function actualizarTurno(
+    token,
+    id,
+    turno
+) {
+    const response = await fetch(
+        `${API_URL}/turnos/${id}`,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(turno),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.mensaje ||
+                "Error al actualizar turno"
+        );
+    }
+
+    return data;
+}
+
+export async function cambiarEstadoTurno(
+    token,
+    id,
+    estado
+) {
+    const response = await fetch(
+        `${API_URL}/turnos/${id}/estado`,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                estado,
+            }),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.mensaje ||
+                "Error al cambiar estado del turno"
+        );
+    }
+
+    return data;
+}
+
+export async function eliminarTurno(
+    token,
+    id
+) {
+    const response = await fetch(
+        `${API_URL}/turnos/${id}`,
+        {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.mensaje ||
+                "Error al eliminar turno"
+        );
+    }
+
+    return data;
+}
