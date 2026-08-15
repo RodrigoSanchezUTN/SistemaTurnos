@@ -11,12 +11,12 @@ import {
 import UsuarioLayout from "../layouts/UsuarioLayout";
 import AppContext from "../context/AppContext";
 import UsuarioContext from "../context/UsuarioContext";
+import { crearReservaTurno } from "../services/api";
 
 function UsuarioReservar() {
   const {
     servicios,
     turnos,
-    setTurnos,
     horarios,
   } = useContext(AppContext);
 
@@ -178,6 +178,14 @@ function UsuarioReservar() {
   const configuracionDia =
     obtenerConfiguracionDia();
 
+    console.log("DEBUG RESERVA:", {
+    horarios,
+    fecha,
+    servicioSeleccionado,
+    configuracionDia,
+    servicios
+});
+
   const horariosDelDia =
     (() => {
       if (
@@ -273,64 +281,88 @@ function UsuarioReservar() {
   // RESERVAR TURNO
   // ==========================
 
-  const reservarTurno = () => {
-    if (!usuario) {
+  const reservarTurno = async () => {
+  if (!usuario) {
+    toast.error(
+      "No hay un usuario iniciado."
+    );
+
+    return;
+  }
+
+  if (!servicioSeleccionado) {
+    toast.error(
+      "Seleccioná un servicio."
+    );
+
+    return;
+  }
+
+  if (!fecha) {
+    toast.error(
+      "Seleccioná una fecha."
+    );
+
+    return;
+  }
+
+  if (!hora) {
+    toast.error(
+      "Seleccioná un horario."
+    );
+
+    return;
+  }
+
+  if (horarioEstaOcupado(hora)) {
+    toast.error(
+      "Ese horario no está disponible."
+    );
+
+    return;
+  }
+
+  try {
+    const token =
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token");
+
+    if (!token) {
       toast.error(
-        "No hay un usuario iniciado."
+        "Tu sesión expiró. Iniciá sesión nuevamente."
       );
+
       return;
     }
 
-    if (!servicioSeleccionado) {
+    if (!servicioActual?.id) {
       toast.error(
-        "Seleccioná un servicio."
+        "No se pudo identificar el servicio."
       );
+
       return;
     }
 
-    if (!fecha) {
-      toast.error(
-        "Seleccioná una fecha."
-      );
-      return;
-    }
+    const fechaHora =
+      `${fecha}T${hora}:00`;
 
-    if (!hora) {
-      toast.error(
-        "Seleccioná un horario."
-      );
-      return;
-    }
+    await crearReservaTurno(
+  token,
+  {
+    fecha: fechaHora,
+    servicioId:
+      servicioActual.id,
+  }
+);
 
-    if (horarioEstaOcupado(hora)) {
-      toast.error(
-        "Ese horario no está disponible."
-      );
-      return;
-    }
-
-    const nuevoTurno = {
-      id: Date.now(),
-
-      cliente: usuario.nombre,
-
-      email: usuario.email,
-
-      telefono: usuario.telefono,
-
-      servicio: servicioSeleccionado,
-
-      fecha,
-
-      hora,
-
-      estado: "Pendiente",
-    };
-
-    setTurnos([
-      ...turnos,
-      nuevoTurno,
-    ]);
+    // Actualizamos el estado local
+    // con el turno que realmente creó
+    // PostgreSQL.
+    // AppProvider también lo recuperará
+    // nuevamente desde el backend.
+    window.dispatchEvent(
+      new Event("auth-changed")
+    );
 
     setServicioSeleccionado("");
     setFecha("");
@@ -339,7 +371,19 @@ function UsuarioReservar() {
     toast.success(
       "¡Turno reservado correctamente!"
     );
-  };
+
+  } catch (error) {
+    console.error(
+      "Error al reservar turno:",
+      error
+    );
+
+    toast.error(
+      error.message ||
+        "No se pudo reservar el turno."
+    );
+  }
+};
 
   // ==========================
   // CAMBIAR FECHA

@@ -18,49 +18,98 @@ import AppContext from "../context/AppContext";
 import "../styles/dashboard.css";
 
 function Dashboard() {
-  const { clientes, servicios, turnos } = useContext(AppContext);
+  const {
+    clientes,
+    servicios,
+    turnos,
+  } = useContext(AppContext);
 
-  const ingresos = turnos.reduce((total, turno) => {
-    const servicioEncontrado = servicios.find(
-      (s) => s.nombre === turno.servicio
-    );
+  // ==========================
+  // INGRESOS
+  // ==========================
 
-    return (
-      total +
-      (servicioEncontrado
-        ? Number(servicioEncontrado.precio)
-        : 0)
-    );
-  }, 0);
+  const ingresos = turnos.reduce(
+    (total, turno) => {
+      const precio =
+        turno.servicio?.precio || 0;
+
+      return total + Number(precio);
+    },
+    0
+  );
+
+  // ==========================
+  // FECHA ACTUAL
+  // ==========================
 
   const fechaHoy = new Date();
-  const añoHoy = fechaHoy.getFullYear();
-  const mesHoy = String(fechaHoy.getMonth() + 1).padStart(2, "0");
-  const diaHoy = String(fechaHoy.getDate()).padStart(2, "0");
 
-  const fechaActual = `${añoHoy}-${mesHoy}-${diaHoy}`;
+  const añoHoy =
+    fechaHoy.getFullYear();
+
+  const mesHoy = String(
+    fechaHoy.getMonth() + 1
+  ).padStart(2, "0");
+
+  const diaHoy = String(
+    fechaHoy.getDate()
+  ).padStart(2, "0");
+
+  const fechaActual =
+    `${añoHoy}-${mesHoy}-${diaHoy}`;
+
+  // ==========================
+  // TURNOS DE HOY
+  // ==========================
 
   const turnosHoy = turnos.filter(
-    (turno) => turno.fecha === fechaActual
+    (turno) => {
+      const fechaTurno =
+        turno.fecha
+          ? String(turno.fecha).split("T")[0]
+          : "";
+
+      return fechaTurno === fechaActual;
+    }
   );
+
+  // ==========================
+  // PRÓXIMOS TURNOS
+  // ==========================
 
   const ahora = new Date();
 
   const proximosTurnos = turnos
     .filter((turno) => {
-      const fechaTurno = new Date(
-        `${turno.fecha}T${turno.hora}`
-      );
+      if (!turno.fecha || !turno.hora) {
+        return false;
+      }
+
+      const fechaTurno =
+        new Date(
+          `${String(turno.fecha).split("T")[0]}T${turno.hora}`
+        );
 
       return fechaTurno >= ahora;
     })
     .sort((a, b) => {
-      const fechaA = new Date(`${a.fecha}T${a.hora}`);
-      const fechaB = new Date(`${b.fecha}T${b.hora}`);
+      const fechaA =
+        new Date(
+          `${String(a.fecha).split("T")[0]}T${a.hora}`
+        );
+
+      const fechaB =
+        new Date(
+          `${String(b.fecha).split("T")[0]}T${b.hora}`
+        );
 
       return fechaA - fechaB;
     })
     .slice(0, 5);
+
+  // ==========================
+  // TARJETAS
+  // ==========================
 
   const cards = [
     {
@@ -94,6 +143,39 @@ function Dashboard() {
       color: "#0891b2",
     },
   ];
+
+  // ==========================
+  // NOMBRE DEL CLIENTE
+  // ==========================
+
+  const obtenerNombreCliente = (
+    turno
+  ) => {
+    if (!turno.cliente) {
+      return "Sin cliente";
+    }
+
+    return `${turno.cliente.nombre || ""} ${
+      turno.cliente.apellido || ""
+    }`.trim();
+  };
+
+  // ==========================
+  // NOMBRE DEL SERVICIO
+  // ==========================
+
+  const obtenerNombreServicio = (
+    turno
+  ) => {
+    return (
+      turno.servicio?.nombre ||
+      "Sin servicio"
+    );
+  };
+
+  // ==========================
+  // RENDER
+  // ==========================
 
   return (
     <DashboardLayout>
@@ -222,29 +304,39 @@ function Dashboard() {
 
             <tbody>
 
-              {proximosTurnos.map((turno) => (
+              {proximosTurnos.map(
+                (turno) => (
 
-                <tr key={turno.id}>
+                  <tr
+                    key={turno.id}
+                  >
 
-                  <td>
-                    {turno.cliente}
-                  </td>
+                    <td>
+                      {obtenerNombreCliente(
+                        turno
+                      )}
+                    </td>
 
-                  <td>
-                    {turno.servicio}
-                  </td>
+                    <td>
+                      {obtenerNombreServicio(
+                        turno
+                      )}
+                    </td>
 
-                  <td>
-                    {turno.fecha}
-                  </td>
+                    <td>
+                      {String(
+                        turno.fecha
+                      ).split("T")[0]}
+                    </td>
 
-                  <td>
-                    {turno.hora}
-                  </td>
+                    <td>
+                      {turno.hora}
+                    </td>
 
-                </tr>
+                  </tr>
 
-              ))}
+                )
+              )}
 
             </tbody>
 
@@ -291,18 +383,26 @@ function Dashboard() {
                 .reverse()
                 .map((turno) => (
 
-                  <tr key={turno.id}>
+                  <tr
+                    key={turno.id}
+                  >
 
                     <td>
-                      {turno.cliente}
+                      {obtenerNombreCliente(
+                        turno
+                      )}
                     </td>
 
                     <td>
-                      {turno.servicio}
+                      {obtenerNombreServicio(
+                        turno
+                      )}
                     </td>
 
                     <td>
-                      {turno.fecha}
+                      {String(
+                        turno.fecha
+                      ).split("T")[0]}
                     </td>
 
                     <td>

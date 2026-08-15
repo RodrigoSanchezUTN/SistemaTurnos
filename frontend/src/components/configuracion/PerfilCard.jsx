@@ -1,55 +1,68 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import { FaUser } from "react-icons/fa";
 
+import UsuarioContext from "../../context/UsuarioContext";
+
 function PerfilCard() {
-  const [perfil, setPerfil] = useState(() => {
-    const datos = localStorage.getItem("perfil");
+  const {
+    usuario,
+    setUsuario,
+  } = useContext(UsuarioContext);
 
-    return datos
-      ? JSON.parse(datos)
-      : {
-          nombre: "",
-          email: "",
-          telefono: "",
-        };
-  });
+  const [telefono, setTelefono] =
+    useState(usuario?.telefono || "");
 
-  const handleChange = (e) => {
-    setPerfil({
-      ...perfil,
-      [e.target.name]: e.target.value,
-    });
+  const handleTelefonoChange = (e) => {
+    setTelefono(e.target.value);
   };
 
   const guardarPerfil = () => {
-    if (!perfil.nombre.trim()) {
-      toast.error("Ingresá tu nombre.");
+    const nombre =
+      usuario?.nombre?.trim() || "";
+
+    const email =
+      usuario?.email?.trim() || "";
+
+    if (!nombre) {
+      toast.error(
+        "Ingresá tu nombre."
+      );
       return;
     }
 
-    if (!perfil.email.trim()) {
-      toast.error("Ingresá tu email.");
+    if (!email) {
+      toast.error(
+        "Ingresá tu email."
+      );
       return;
     }
 
     const emailValido =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(perfil.email);
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        email
+      );
 
     if (!emailValido) {
-      toast.error("Ingresá un email válido.");
+      toast.error(
+        "Ingresá un email válido."
+      );
       return;
     }
 
-    if (!perfil.telefono.trim()) {
-      toast.error("Ingresá tu teléfono.");
+    if (!telefono.trim()) {
+      toast.error(
+        "Ingresá tu teléfono."
+      );
       return;
     }
 
-    localStorage.setItem(
-      "perfil",
-      JSON.stringify(perfil)
-    );
+    setUsuario({
+      ...usuario,
+      nombre,
+      email,
+      telefono: telefono.trim(),
+    });
 
     toast.success(
       "Perfil actualizado correctamente"
@@ -64,6 +77,8 @@ function PerfilCard() {
         Perfil
       </h4>
 
+      {/* NOMBRE */}
+
       <div className="mb-3">
 
         <label className="form-label">
@@ -73,12 +88,18 @@ function PerfilCard() {
         <input
           type="text"
           className="form-control"
-          name="nombre"
-          value={perfil.nombre}
-          onChange={handleChange}
+          value={usuario?.nombre || ""}
+          onChange={(e) =>
+            setUsuario({
+              ...usuario,
+              nombre: e.target.value,
+            })
+          }
         />
 
       </div>
+
+      {/* EMAIL */}
 
       <div className="mb-3">
 
@@ -89,12 +110,18 @@ function PerfilCard() {
         <input
           type="email"
           className="form-control"
-          name="email"
-          value={perfil.email}
-          onChange={handleChange}
+          value={usuario?.email || ""}
+          onChange={(e) =>
+            setUsuario({
+              ...usuario,
+              email: e.target.value,
+            })
+          }
         />
 
       </div>
+
+      {/* TELÉFONO */}
 
       <div className="mb-4">
 
@@ -105,14 +132,16 @@ function PerfilCard() {
         <input
           type="text"
           className="form-control"
-          name="telefono"
-          value={perfil.telefono}
-          onChange={handleChange}
+          value={telefono}
+          onChange={handleTelefonoChange}
         />
 
       </div>
 
+      {/* GUARDAR */}
+
       <button
+        type="button"
         className="btn btn-primary"
         onClick={guardarPerfil}
       >

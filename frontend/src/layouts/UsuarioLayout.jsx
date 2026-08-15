@@ -78,6 +78,8 @@ function UsuarioLayout({ children }) {
     cerrarSesion,
   } = useContext(UsuarioContext);
 
+  
+
   const navigate = useNavigate();
 
   const [menuAbierto, setMenuAbierto] =

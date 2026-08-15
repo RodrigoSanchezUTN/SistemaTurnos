@@ -2,7 +2,8 @@ const express = require("express");
 
 const {
     registrarUsuario,
-    loginUsuario
+    registrarUsuarioPublico,
+    loginUsuario,
 } = require("../controllers/authController");
 
 const verificarToken = require("../middleware/authMiddleware");
@@ -18,7 +19,11 @@ router.post(
     loginUsuario
 );
 
-
+// Registro público de usuarios normales
+router.post(
+    "/registro-publico",
+    registrarUsuarioPublico
+);
 // Registro
 // Solo Administradores pueden crear usuarios
 router.post(

@@ -4,9 +4,86 @@ const jwt = require("jsonwebtoken");
 
 const ROLES_VALIDOS = [
     "Administrador",
-    "Empleado"
+    "Usuario"
 ];
 
+const registrarUsuarioPublico = async (req, res, next) => {
+    try {
+        const {
+            nombre,
+            email,
+            password,
+            telefono
+        } = req.body;
+
+        if (!nombre || !email || !password) {
+            return res.status(400).json({
+                mensaje: "Nombre, email y contraseña son obligatorios."
+            });
+        }
+
+        const emailNormalizado =
+            email.trim().toLowerCase();
+
+        const emailValido =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailValido.test(emailNormalizado)) {
+            return res.status(400).json({
+                mensaje: "El email no es válido."
+            });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({
+                mensaje:
+                    "La contraseña debe tener al menos 6 caracteres."
+            });
+        }
+
+        const usuarioExistente =
+            await prisma.usuario.findUnique({
+                where: {
+                    email: emailNormalizado
+                }
+            });
+
+        if (usuarioExistente) {
+            return res.status(409).json({
+                mensaje:
+                    "Ya existe un usuario con ese email."
+            });
+        }
+
+        const passwordHash =
+            await bcrypt.hash(password, 10);
+
+        const usuario =
+            await prisma.usuario.create({
+                data: {
+                    nombre: nombre.trim(),
+                    email: emailNormalizado,
+                    password: passwordHash,
+                    rol: "Usuario"
+                }
+            });
+
+        res.status(201).json({
+            mensaje:
+                "Usuario registrado correctamente.",
+            usuario: {
+                id: usuario.id,
+                nombre: usuario.nombre,
+                email: usuario.email,
+                telefono: telefono || "",
+                rol: "Usuario"
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 const registrarUsuario = async (req, res, next) => {
     try {
@@ -177,5 +254,7 @@ const loginUsuario = async (req, res, next) => {
 
 module.exports = {
     registrarUsuario,
+    registrarUsuarioPublico,
     loginUsuario
+    
 };

@@ -1,5 +1,18 @@
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import AppContext from "./AppContext";
+
+import {
+  obtenerClientes,
+  obtenerServicios,
+  obtenerTurnos,
+  obtenerHorarios,
+  guardarHorarios,
+} from "../services/api";
 
 const horariosPorDefecto = {
   lunes: {
@@ -64,130 +77,287 @@ function AppProvider({ children }) {
   // CLIENTES
   // ==========================
 
-  const [clientes, setClientes] = useState(() => {
-    const datos = localStorage.getItem("clientes");
-
-    return datos
-      ? JSON.parse(datos)
-      : [
-          {
-            id: 1,
-            nombre: "Juan Pérez",
-            telefono: "2604123456",
-            email: "juan@gmail.com",
-          },
-          {
-            id: 2,
-            nombre: "María Gómez",
-            telefono: "2604555555",
-            email: "maria@gmail.com",
-          },
-        ];
-  });
+  const [clientes, setClientes] = useState([]);
 
   // ==========================
   // SERVICIOS
   // ==========================
 
-  const [servicios, setServicios] = useState(() => {
-    const datos = localStorage.getItem("servicios");
-
-    return datos
-      ? JSON.parse(datos)
-      : [
-          {
-            id: 1,
-            nombre: "Masaje Relajante",
-            duracion: 60,
-            precio: 18000,
-          },
-          {
-            id: 2,
-            nombre: "Drenaje Linfático",
-            duracion: 45,
-            precio: 22000,
-          },
-        ];
-  });
+  const [servicios, setServicios] = useState([]);
 
   // ==========================
   // TURNOS
   // ==========================
 
-  const [turnos, setTurnos] = useState(() => {
-    const datos = localStorage.getItem("turnos");
+  const [turnos, setTurnos] = useState([]);
 
-    return datos ? JSON.parse(datos) : [];
-  });
+  // ==========================
+  // CARGANDO DATOS
+  // ==========================
+
+  const [cargandoDatos, setCargandoDatos] =
+    useState(false);
 
   // ==========================
   // HORARIOS
   // ==========================
 
-  const [horarios, setHorarios] = useState(() => {
-    const datos = localStorage.getItem("horarios");
+  const [horarios, setHorarios] =
+    useState(horariosPorDefecto);
 
-    if (!datos) {
-      return horariosPorDefecto;
+  // ==========================
+  // CONVERTIR HORARIOS
+  // ==========================
+
+  const convertirHorarios = (
+    horariosBackend
+  ) => {
+    const resultado = {
+      ...horariosPorDefecto,
+    };
+
+    if (!Array.isArray(horariosBackend)) {
+      return resultado;
     }
 
-    try {
-      const guardados = JSON.parse(datos);
+    horariosBackend.forEach((horario) => {
+      if (!horario?.dia) {
+        return;
+      }
 
-      // Combina lo guardado con los horarios por defecto.
-      // Así nunca desaparece un día por una configuración vieja.
-      return {
-        ...horariosPorDefecto,
-        ...guardados,
+      resultado[horario.dia] = {
+        activo: Boolean(horario.activo),
+        inicio: horario.inicio || "",
+        fin: horario.fin || "",
+        inicio2: horario.inicio2 || "",
+        fin2: horario.fin2 || "",
       };
-    } catch {
-      return horariosPorDefecto;
-    }
-  });
+    });
+
+    return resultado;
+  };
 
   // ==========================
-  // GUARDAR CLIENTES
+  // OBTENER TOKEN
   // ==========================
 
-  useEffect(() => {
-    localStorage.setItem(
-      "clientes",
-      JSON.stringify(clientes)
+  const obtenerToken = () => {
+    return (
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token")
     );
-  }, [clientes]);
+  };
 
   // ==========================
-  // GUARDAR SERVICIOS
+  // CARGAR DATOS DEL BACKEND
   // ==========================
 
-  useEffect(() => {
-    localStorage.setItem(
-      "servicios",
-      JSON.stringify(servicios)
-    );
-  }, [servicios]);
+  const cargarDatosBackend =
+    useCallback(async () => {
+      const token = obtenerToken();
 
-  // ==========================
-  // GUARDAR TURNOS
-  // ==========================
+      if (!token) {
+        setClientes([]);
+        setServicios([]);
+        setTurnos([]);
+        setHorarios(horariosPorDefecto);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "turnos",
-      JSON.stringify(turnos)
-    );
-  }, [turnos]);
+        return;
+      }
+
+      try {
+        setCargandoDatos(true);
+
+        /*
+         * Usamos Promise.allSettled para que si un usuario
+         * normal recibe 403 en /clientes, eso NO impida
+         * cargar servicios, turnos y horarios.
+         */
+
+        const resultados =
+          await Promise.allSettled([
+            obtenerClientes(token),
+            obtenerServicios(token),
+            obtenerTurnos(token),
+            obtenerHorarios(token),
+          ]);
+
+        // ==========================
+        // CLIENTES
+        // ==========================
+
+        if (
+          resultados[0].status ===
+          "fulfilled"
+        ) {
+          setClientes(
+            Array.isArray(
+              resultados[0].value
+            )
+              ? resultados[0].value
+              : []
+          );
+        } else {
+          console.warn(
+            "No se pudieron cargar los clientes:",
+            resultados[0].reason
+          );
+
+          setClientes([]);
+        }
+
+        // ==========================
+        // SERVICIOS
+        // ==========================
+
+        if (
+          resultados[1].status ===
+          "fulfilled"
+        ) {
+          setServicios(
+            Array.isArray(
+              resultados[1].value
+            )
+              ? resultados[1].value
+              : []
+          );
+        } else {
+          console.error(
+            "No se pudieron cargar los servicios:",
+            resultados[1].reason
+          );
+
+          setServicios([]);
+        }
+
+        // ==========================
+        // TURNOS
+        // ==========================
+
+        if (
+          resultados[2].status ===
+          "fulfilled"
+        ) {
+          setTurnos(
+            Array.isArray(
+              resultados[2].value
+            )
+              ? resultados[2].value
+              : []
+          );
+        } else {
+          console.error(
+            "No se pudieron cargar los turnos:",
+            resultados[2].reason
+          );
+
+          setTurnos([]);
+        }
+
+        // ==========================
+        // HORARIOS
+        // ==========================
+
+        if (
+          resultados[3].status ===
+          "fulfilled"
+        ) {
+          setHorarios(
+            convertirHorarios(
+              resultados[3].value
+            )
+          );
+        } else {
+          console.error(
+            "No se pudieron cargar los horarios:",
+            resultados[3].reason
+          );
+
+          setHorarios(
+            horariosPorDefecto
+          );
+        }
+
+      } catch (error) {
+        console.error(
+          "Error inesperado al cargar datos:",
+          error
+        );
+
+      } finally {
+        setCargandoDatos(false);
+      }
+    }, []);
 
   // ==========================
   // GUARDAR HORARIOS
   // ==========================
 
-  useEffect(() => {
-    localStorage.setItem(
-      "horarios",
-      JSON.stringify(horarios)
+  const guardarHorariosBackend =
+    useCallback(
+      async (nuevosHorarios) => {
+        const token =
+          obtenerToken();
+
+        if (!token) {
+          throw new Error(
+            "No hay una sesión iniciada."
+          );
+        }
+
+        const respuesta =
+          await guardarHorarios(
+            token,
+            nuevosHorarios
+          );
+
+        setHorarios(
+          convertirHorarios(
+            respuesta.horarios
+          )
+        );
+
+        return respuesta;
+      },
+      []
     );
-  }, [horarios]);
+
+  // ==========================
+  // ESCUCHAR CAMBIOS DE SESIÓN
+  // ==========================
+
+  useEffect(() => {
+    const actualizarDatos = () => {
+      cargarDatosBackend();
+    };
+
+    /*
+     * Cargar datos al iniciar la aplicación.
+     *
+     * El pequeño retraso evita el warning de ESLint
+     * relacionado con actualizaciones de estado dentro
+     * del efecto.
+     */
+
+    const temporizador =
+      setTimeout(() => {
+        cargarDatosBackend();
+      }, 0);
+
+    window.addEventListener(
+      "auth-changed",
+      actualizarDatos
+    );
+
+    return () => {
+      clearTimeout(temporizador);
+
+      window.removeEventListener(
+        "auth-changed",
+        actualizarDatos
+      );
+    };
+  }, [cargarDatosBackend]);
 
   // ==========================
   // CONTEXT
@@ -207,6 +377,11 @@ function AppProvider({ children }) {
 
         horarios,
         setHorarios,
+
+        guardarHorariosBackend,
+
+        cargandoDatos,
+        cargarDatosBackend,
       }}
     >
       {children}

@@ -1,12 +1,18 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { FaClock, FaSave } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 import AppContext from "../../context/AppContext";
 
 function HorariosCard() {
-  const { horarios, setHorarios } =
-    useContext(AppContext);
+  const {
+    horarios,
+    setHorarios,
+    guardarHorariosBackend,
+  } = useContext(AppContext);
+
+  const [guardando, setGuardando] =
+    useState(false);
 
   const cambiarHorario = (
     dia,
@@ -32,10 +38,32 @@ function HorariosCard() {
     });
   };
 
-  const guardarHorarios = () => {
-    toast.success(
-      "Horarios actualizados correctamente."
-    );
+  const guardarHorarios = async () => {
+    try {
+      setGuardando(true);
+
+      await guardarHorariosBackend(
+        horarios
+      );
+
+      toast.success(
+        "Horarios actualizados correctamente."
+      );
+
+    } catch (error) {
+      console.error(
+        "Error al guardar horarios:",
+        error
+      );
+
+      toast.error(
+        error.message ||
+          "No se pudieron guardar los horarios."
+      );
+
+    } finally {
+      setGuardando(false);
+    }
   };
 
   const dias = [
@@ -108,6 +136,7 @@ function HorariosCard() {
                 onClick={() =>
                   cambiarEstado(dia.id)
                 }
+                disabled={guardando}
               >
                 {configuracion.activo
                   ? "Abierto"
@@ -118,9 +147,11 @@ function HorariosCard() {
 
             {configuracion.activo && (
               <>
+
                 <div className="row g-2">
 
                   <div className="col-6">
+
                     <label className="form-label small text-muted">
                       Apertura
                     </label>
@@ -138,10 +169,13 @@ function HorariosCard() {
                           e.target.value
                         )
                       }
+                      disabled={guardando}
                     />
+
                   </div>
 
                   <div className="col-6">
+
                     <label className="form-label small text-muted">
                       Cierre
                     </label>
@@ -159,7 +193,9 @@ function HorariosCard() {
                           e.target.value
                         )
                       }
+                      disabled={guardando}
                     />
+
                   </div>
 
                 </div>
@@ -167,6 +203,7 @@ function HorariosCard() {
                 <div className="row g-2 mt-1">
 
                   <div className="col-6">
+
                     <label className="form-label small text-muted">
                       Segunda apertura
                     </label>
@@ -184,10 +221,13 @@ function HorariosCard() {
                           e.target.value
                         )
                       }
+                      disabled={guardando}
                     />
+
                   </div>
 
                   <div className="col-6">
+
                     <label className="form-label small text-muted">
                       Segundo cierre
                     </label>
@@ -205,10 +245,13 @@ function HorariosCard() {
                           e.target.value
                         )
                       }
+                      disabled={guardando}
                     />
+
                   </div>
 
                 </div>
+
               </>
             )}
 
@@ -220,9 +263,13 @@ function HorariosCard() {
         type="button"
         className="btn btn-primary w-100 mt-2"
         onClick={guardarHorarios}
+        disabled={guardando}
       >
         <FaSave className="me-2" />
-        Guardar horarios
+
+        {guardando
+          ? "Guardando..."
+          : "Guardar horarios"}
       </button>
 
     </div>

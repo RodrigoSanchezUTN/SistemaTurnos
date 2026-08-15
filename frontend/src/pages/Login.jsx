@@ -86,10 +86,11 @@ function Login() {
 
         iniciarSesion(datosUsuario);
 
-localStorage.setItem(
-    "usuario",
-    JSON.stringify(datosUsuario)
+window.dispatchEvent(
+  new Event("auth-changed")
 );
+
+
 
         // Redirigir según el rol
         if (rolFrontend === "admin") {

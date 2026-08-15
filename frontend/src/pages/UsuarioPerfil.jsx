@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -17,22 +17,20 @@ function UsuarioPerfil() {
     usuario,
     setUsuario,
   } = useContext(UsuarioContext);
+  console.log("USUARIO EN PERFIL:", usuario);
 
   // ==========================
-  // DATOS PERSONALES
+  // DATOS DEL USUARIO
   // ==========================
 
-  const [nombre, setNombre] = useState(
-    usuario?.nombre || ""
-  );
+  const nombre =
+    usuario?.nombre || "";
 
-  const [email, setEmail] = useState(
-    usuario?.email || ""
-  );
+  const email =
+    usuario?.email || "";
 
-  const [telefono, setTelefono] = useState(
-    usuario?.telefono || ""
-  );
+  const telefono =
+    usuario?.telefono || "";
 
   // ==========================
   // DETECTAR GOOGLE
@@ -56,21 +54,21 @@ function UsuarioPerfil() {
   // ==========================
 
   const guardarCambios = () => {
-    if (!nombre.trim()) {
+    if (!usuario?.nombre?.trim()) {
       toast.error(
         "Ingresá tu nombre."
       );
       return;
     }
 
-    if (!email.trim()) {
+    if (!usuario?.email?.trim()) {
       toast.error(
         "Ingresá tu correo electrónico."
       );
       return;
     }
 
-    if (!telefono.trim()) {
+    if (!usuario?.telefono?.trim()) {
       toast.error(
         "Ingresá tu teléfono."
       );
@@ -79,9 +77,9 @@ function UsuarioPerfil() {
 
     setUsuario({
       ...usuario,
-      nombre: nombre.trim(),
-      email: email.trim(),
-      telefono: telefono.trim(),
+      nombre: usuario.nombre.trim(),
+      email: usuario.email.trim(),
+      telefono: usuario.telefono.trim(),
     });
 
     toast.success(
@@ -217,9 +215,10 @@ function UsuarioPerfil() {
               className="form-control"
               value={nombre}
               onChange={(e) =>
-                setNombre(
-                  e.target.value
-                )
+                setUsuario({
+                  ...usuario,
+                  nombre: e.target.value,
+                })
               }
               placeholder="Tu nombre"
             />
@@ -245,9 +244,10 @@ function UsuarioPerfil() {
               className="form-control"
               value={email}
               onChange={(e) =>
-                setEmail(
-                  e.target.value
-                )
+                setUsuario({
+                  ...usuario,
+                  email: e.target.value,
+                })
               }
               placeholder="correo@ejemplo.com"
             />
@@ -279,9 +279,10 @@ function UsuarioPerfil() {
               className="form-control"
               value={telefono}
               onChange={(e) =>
-                setTelefono(
-                  e.target.value
-                )
+                setUsuario({
+                  ...usuario,
+                  telefono: e.target.value,
+                })
               }
               placeholder="Tu teléfono"
             />

@@ -12,11 +12,31 @@ const verificarRol = require("../middleware/roleMiddleware");
 
 const router = express.Router();
 
-router.get("/", verificarToken, obtenerClientes);
+// ==========================
+// CLIENTES
+// SOLO ADMINISTRADORES
+// ==========================
 
-router.post("/", verificarToken, crearCliente);
+router.get(
+    "/",
+    verificarToken,
+    verificarRol("Administrador"),
+    obtenerClientes
+);
 
-router.put("/:id", verificarToken, actualizarCliente);
+router.post(
+    "/",
+    verificarToken,
+    verificarRol("Administrador"),
+    crearCliente
+);
+
+router.put(
+    "/:id",
+    verificarToken,
+    verificarRol("Administrador"),
+    actualizarCliente
+);
 
 router.delete(
     "/:id",

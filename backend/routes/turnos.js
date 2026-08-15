@@ -3,9 +3,11 @@ const express = require("express");
 const {
     obtenerTurnos,
     crearTurno,
+    crearReserva,
     actualizarTurno,
     cambiarEstadoTurno,
-    eliminarTurno
+    eliminarTurno,
+    cancelarTurno
 } = require("../controllers/turnosController");
 
 const verificarToken = require("../middleware/authMiddleware");
@@ -13,35 +15,76 @@ const verificarRol = require("../middleware/roleMiddleware");
 
 const router = express.Router();
 
-// Ver turnos
+// ==========================
+// VER TURNOS
+// ==========================
+
 router.get(
     "/",
     verificarToken,
     obtenerTurnos
 );
 
-// Crear turno
+// ==========================
+// RESERVA DE USUARIO
+// ==========================
+
+router.post(
+    "/reserva",
+    verificarToken,
+    crearReserva
+);
+
+// ==========================
+// CANCELAR TURNO DE USUARIO
+// ==========================
+
+router.patch(
+    "/:id/cancelar",
+    verificarToken,
+    cancelarTurno
+);
+// ==========================
+// CREAR TURNO
+// SOLO ADMINISTRADOR
+// ==========================
+
 router.post(
     "/",
     verificarToken,
+    verificarRol("Administrador"),
     crearTurno
 );
 
-// Modificar turno
+// ==========================
+// MODIFICAR TURNO
+// SOLO ADMINISTRADOR
+// ==========================
+
 router.put(
     "/:id",
     verificarToken,
+    verificarRol("Administrador"),
     actualizarTurno
 );
 
-// Cambiar estado
+// ==========================
+// CAMBIAR ESTADO
+// SOLO ADMINISTRADOR
+// ==========================
+
 router.patch(
     "/:id/estado",
     verificarToken,
+    verificarRol("Administrador"),
     cambiarEstadoTurno
 );
 
-// Eliminar turno: solo Administrador
+// ==========================
+// ELIMINAR TURNO
+// SOLO ADMINISTRADOR
+// ==========================
+
 router.delete(
     "/:id",
     verificarToken,

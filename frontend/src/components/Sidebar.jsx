@@ -1,4 +1,8 @@
 import {
+  useContext,
+} from "react";
+
+import {
   FaHome,
   FaUsers,
   FaSpa,
@@ -9,12 +13,23 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
 import Swal from "sweetalert2";
+
+import UsuarioContext from "../context/UsuarioContext";
 
 function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const {
+    cerrarSesion: cerrarSesionContext,
+  } = useContext(UsuarioContext);
 
   const menu = [
     {
@@ -54,22 +69,59 @@ function Sidebar() {
     },
   ];
 
+  // ==========================
+  // CERRAR SESIÓN
+  // ==========================
+
   const cerrarSesion = async () => {
-    const resultado = await Swal.fire({
-      title: "¿Cerrar sesión?",
-      text: "¿Estás seguro de que querés cerrar tu sesión?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sí, cerrar sesión",
-      cancelButtonText: "Cancelar",
-      reverseButtons: true,
-    });
+    const resultado =
+      await Swal.fire({
+        title: "¿Cerrar sesión?",
+        text:
+          "¿Estás seguro de que querés cerrar tu sesión?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText:
+          "Sí, cerrar sesión",
+        cancelButtonText:
+          "Cancelar",
+        reverseButtons: true,
+      });
 
     if (!resultado.isConfirmed) {
       return;
     }
 
-    navigate("/");
+    try {
+      // ==========================
+      // CERRAR SESIÓN REAL
+      // ==========================
+
+      await cerrarSesionContext();
+
+      // ==========================
+      // VOLVER AL LOGIN
+      // ==========================
+
+      navigate("/", {
+        replace: true,
+      });
+
+    } catch (error) {
+      console.error(
+        "Error al cerrar sesión:",
+        error
+      );
+
+      Swal.fire({
+        title: "Error",
+        text:
+          "No se pudo cerrar la sesión correctamente.",
+        icon: "error",
+        confirmButtonText:
+          "Aceptar",
+      });
+    }
   };
 
   return (
@@ -83,19 +135,35 @@ function Sidebar() {
         flexDirection: "column",
       }}
     >
+
+      {/* ==========================
+          LOGO
+      ========================== */}
+
       <div
         style={{
           padding: "30px",
           textAlign: "center",
-          borderBottom: "1px solid #334155",
+          borderBottom:
+            "1px solid #334155",
         }}
       >
-        <h3 className="fw-bold mb-1">Turnify</h3>
+        <h3 className="fw-bold mb-1">
+          Turnify
+        </h3>
 
-        <small style={{ color: "#94a3b8" }}>
+        <small
+          style={{
+            color: "#94a3b8",
+          }}
+        >
           Sistema de Gestión
         </small>
       </div>
+
+      {/* ==========================
+          MENÚ
+      ========================== */}
 
       <div
         className="p-3"
@@ -108,13 +176,15 @@ function Sidebar() {
             key={item.ruta}
             to={item.ruta}
             className={`btn w-100 text-start mb-2 ${
-              location.pathname === item.ruta
+              location.pathname ===
+              item.ruta
                 ? "btn-primary"
                 : ""
             }`}
             style={{
               background:
-                location.pathname === item.ruta
+                location.pathname ===
+                item.ruta
                   ? "#2563eb"
                   : "transparent",
 
@@ -136,20 +206,28 @@ function Sidebar() {
         ))}
       </div>
 
+      {/* ==========================
+          CERRAR SESIÓN
+      ========================== */}
+
       <div
         className="p-3"
         style={{
-          borderTop: "1px solid #334155",
+          borderTop:
+            "1px solid #334155",
         }}
       >
         <button
+          type="button"
           onClick={cerrarSesion}
           className="btn btn-danger w-100"
         >
           <FaSignOutAlt className="me-2" />
+
           Cerrar sesión
         </button>
       </div>
+
     </aside>
   );
 }

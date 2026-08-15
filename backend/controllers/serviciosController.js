@@ -121,6 +121,20 @@ const eliminarServicio = async (req, res, next) => {
             });
         }
 
+        const turnosAsociados =
+            await prisma.turno.count({
+                where: {
+                    servicioId: id
+                }
+            });
+
+        if (turnosAsociados > 0) {
+            return res.status(409).json({
+                mensaje:
+                    "No se puede eliminar este servicio porque tiene turnos asociados."
+            });
+        }
+
         await prisma.servicio.delete({
             where: {
                 id: id

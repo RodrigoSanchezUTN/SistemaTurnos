@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 
 const ROLES_VALIDOS = [
     "Administrador",
-    "Empleado"
+    "Usuario"
 ];
 
 

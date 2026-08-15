@@ -15,38 +15,54 @@ model Usuario {
   rol      String
 
   turnos   Turno[]
+  horarios Horario[]
 }
 
 model Cliente {
-  id             Int    @id @default(autoincrement())
-  nombre         String
-  apellido       String
-  telefono       String
-  email          String
-  observaciones  String?
+  id            Int     @id @default(autoincrement())
+  nombre        String
+  apellido      String
+  telefono      String
+  email         String
+  observaciones String?
 
-  turnos         Turno[]
+  turnos Turno[]
 }
 
 model Servicio {
-  id        Int    @id @default(autoincrement())
-  nombre    String
-  precio    Float
-  duracion  Int
+  id       Int    @id @default(autoincrement())
+  nombre   String
+  precio   Float
+  duracion Int
 
-  turnos    Turno[]
+  turnos Turno[]
 }
 
 model Turno {
-  id          Int      @id @default(autoincrement())
-  fecha       DateTime
-  estado      String
+  id        Int      @id @default(autoincrement())
+  fecha     DateTime
+  estado    String
 
-  clienteId   Int
-  servicioId  Int
-  usuarioId   Int
+  clienteId  Int
+  servicioId Int
+  usuarioId  Int
 
-  cliente      Cliente   @relation(fields: [clienteId], references: [id])
-  servicio     Servicio  @relation(fields: [servicioId], references: [id])
-  usuario      Usuario   @relation(fields: [usuarioId], references: [id])
+  cliente  Cliente  @relation(fields: [clienteId], references: [id])
+  servicio Servicio @relation(fields: [servicioId], references: [id])
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id])
+}
+
+model Horario {
+  id       Int     @id @default(autoincrement())
+  dia      String
+  activo   Boolean @default(true)
+  inicio   String
+  fin      String
+  inicio2  String?
+  fin2     String?
+
+  usuarioId Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([usuarioId, dia])
 }

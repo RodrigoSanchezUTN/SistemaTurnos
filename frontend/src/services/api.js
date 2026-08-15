@@ -21,6 +21,40 @@ export async function login(email, password) {
     return data;
 }
 
+export async function registrarUsuarioPublico(
+    nombre,
+    email,
+    password,
+    telefono
+) {
+    const response = await fetch(
+        `${API_URL}/auth/registro-publico`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nombre,
+                email,
+                password,
+                telefono,
+            }),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.mensaje ||
+                "Error al registrar usuario"
+        );
+    }
+
+    return data;
+}
+
 export async function obtenerServicios(token) {
     const response = await fetch(`${API_URL}/servicios`, {
         headers: {
@@ -305,6 +339,89 @@ export async function eliminarTurno(
         throw new Error(
             data.mensaje ||
                 "Error al eliminar turno"
+        );
+    }
+
+    return data;
+}
+
+// ==========================
+// HORARIOS
+// ==========================
+
+export async function obtenerHorarios(token) {
+    const response = await fetch(
+        `${API_URL}/horarios`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.mensaje ||
+                "Error al obtener horarios"
+        );
+    }
+
+    return data;
+}
+
+
+export async function guardarHorarios(
+    token,
+    horarios
+) {
+    const response = await fetch(
+        `${API_URL}/horarios`,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(horarios),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.mensaje ||
+                "Error al guardar horarios"
+        );
+    }
+
+    return data;
+}
+
+export async function crearReservaTurno(
+    token,
+    reserva
+) {
+    const response = await fetch(
+        `${API_URL}/turnos/reserva`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(reserva),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.mensaje ||
+                "Error al reservar el turno"
         );
     }
 

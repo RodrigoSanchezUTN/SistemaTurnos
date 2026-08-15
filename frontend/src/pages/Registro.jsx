@@ -18,6 +18,7 @@ import {
 
 import { auth } from "../firebase";
 import UsuarioContext from "../context/UsuarioContext";
+import { registrarUsuarioPublico } from "../services/api";
 
 function Registro() {
   const navigate = useNavigate();
@@ -130,6 +131,18 @@ function Registro() {
       const usuarioFirebase =
         resultado.user;
 
+
+        // ==========================
+// REGISTRAR EN BACKEND
+// ==========================
+
+await registrarUsuarioPublico(
+  nombre.trim(),
+  email.trim().toLowerCase(),
+  password,
+  telefono.trim()
+);
+
       // ==========================
       // GUARDAR NOMBRE
       // ==========================
@@ -169,7 +182,7 @@ function Registro() {
           usuarioFirebase.photoURL ||
           "",
 
-        rol: "usuario",
+        rol: "Usuario",
 
         proveedor: "email",
       };

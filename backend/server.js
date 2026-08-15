@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 
@@ -8,8 +10,10 @@ const usuariosRoutes = require("./routes/usuarios");
 const authRoutes = require("./routes/auth");
 
 const errorMiddleware = require("./middleware/errorMiddleware");
+const horariosRoutes = require("./routes/horarios");
 
 const app = express();
+
 app.use(cors());
 
 app.use(express.json());
@@ -21,6 +25,7 @@ app.get("/", (req, res) => {
 app.use("/clientes", clientesRoutes);
 app.use("/servicios", serviciosRoutes);
 app.use("/turnos", turnosRoutes);
+app.use("/horarios", horariosRoutes);
 app.use("/usuarios", usuariosRoutes);
 app.use("/auth", authRoutes);
 
